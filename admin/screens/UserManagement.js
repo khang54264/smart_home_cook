@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TextInput, Button, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TextInput, Button, TouchableOpacity, ScrollView } from 'react-native';
 import axios from 'axios';
 
 const UserManagement = () => {
@@ -46,7 +46,7 @@ const UserManagement = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.title}>User Management</Text>
       <FlatList
         data={users}
@@ -100,7 +100,7 @@ const UserManagement = () => {
           <Button title="Submit" onPress={addUser} />
         </View>
       )}
-    </View>
+    </ScrollView>
     
   );
 };

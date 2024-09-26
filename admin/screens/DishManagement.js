@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TextInput, Button, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TextInput, Button, TouchableOpacity, ScrollView } from 'react-native';
 import axios from 'axios';
 
 const DishManagement = () => {
@@ -39,7 +39,7 @@ const DishManagement = () => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <Text style={styles.title}>Dish Management</Text>
       <FlatList
         data={dishes}
@@ -101,7 +101,7 @@ const DishManagement = () => {
       />
       <Button title="Add Dish" onPress={addDish} />
     </View>
-    </View>
+    </ScrollView>
   );
 };
 
