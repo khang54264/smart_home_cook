@@ -3,55 +3,90 @@ import React from 'react';
 import { StyleSheet, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createStackNavigator } from '@react-navigation/stack';
 import UserManagement from './admin/screens/UserManagement';
 import DishManagement from './admin/screens/DishManagement';
+import Login from './admin/screens/Login';
 import { StatusBar } from 'expo-status-bar';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 const Drawer = createDrawerNavigator();
+const Stack = createStackNavigator();
 
 export default function App() {
   return (
     <NavigationContainer>
-      <View style={styles.container}>
-        <Drawer.Navigator
-          initialRouteName="UserManagement"
-          screenOptions={{
-            drawerStyle: {
-              backgroundColor: '#f0f0f0', // Background color of the drawer
-              width: 300,
-            },
-            drawerActiveTintColor: '#e91e63', // Active item color
-            drawerInactiveTintColor: '#000', // Inactive item color
-            drawerLabelStyle: {
-              fontSize: 18, // Font size of labels
-            },
-          }}
-        >
-          <Drawer.Screen
-            name="User Management"
-            component={UserManagement}
-            options={{
-              drawerIcon: ({ focused, size }) => (
-                <Icon name="people" size={size} color={focused ? '#e91e63' : '#000'} />
-              ),
-            }}
-          />
-          <Drawer.Screen
-            name="Dish Management"
-            component={DishManagement}
-            options={{
-              drawerIcon: ({ focused, size }) => (
-                <Icon name="restaurant" size={size} color={focused ? '#e91e63' : '#000'} />
-              ),
-            }}
-          />
-        </Drawer.Navigator>
-      </View>
-      <StatusBar style="auto" />
-    </NavigationContainer>
+    <Stack.Navigator initialRouteName="Login">
+      <Stack.Screen 
+        name="Login" 
+        component={Login} 
+        options={{ headerShown: false }} // Hide the header
+      />
+      <Stack.Screen 
+        name="Drawer" 
+        component={DrawerNavigator} 
+        options={{ headerShown: false }} // Hide the header for Drawer Navigator
+      />
+    </Stack.Navigator>
+  </NavigationContainer>
   );
 }
+
+const DrawerNavigator = ({navigation}) => {
+  const handleLogout = () => {
+    navigation.navigate('Login');
+  };
+  return(
+  <Drawer.Navigator
+    initialRouteName="UserManagement"
+    screenOptions={{
+      drawerStyle: {
+        backgroundColor: '#f0f0f0',
+        width: 300,
+      },
+      drawerActiveTintColor: '#e91e63',
+      drawerInactiveTintColor: '#000',
+      drawerLabelStyle: {
+        fontSize: 18,
+      },
+    }}
+  >
+    <Drawer.Screen
+      name="User Management"
+      component={UserManagement}
+      options={{
+        drawerIcon: ({ focused, size }) => (
+          <Icon name="people" size={size} color={focused ? '#e91e63' : '#000'} />
+        ),
+      }}
+    />
+    <Drawer.Screen
+      name="Dish Management"
+      component={DishManagement}
+      options={{
+        drawerIcon: ({ focused, size }) => (
+          <Icon name="restaurant" size={size} color={focused ? '#e91e63' : '#000'} />
+        ),
+      }}
+    />
+    <Drawer.Screen
+        name="Log Out"
+        component={() => null} 
+        options={{
+          drawerIcon: ({ focused, size }) => (
+            <Icon name="log-out" size={size} color={focused ? '#e91e63' : '#000'} />
+          ),
+          drawerItemStyle: { height: 60 }, 
+          title: 'Log Out', 
+        }}
+        listeners={{
+          drawerPress: () => handleLogout(),
+        }}
+      />
+  </Drawer.Navigator>
+);
+};
+
 
 const styles = StyleSheet.create({
   container: {

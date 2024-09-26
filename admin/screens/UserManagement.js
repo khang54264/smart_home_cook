@@ -84,17 +84,16 @@ const UserManagement = () => {
     <ScrollView style={styles.container}>
     <Text style={styles.title}>User Management</Text>
 
-    {/* Search Field */}
-    <TextInput
-      style={styles.input}
+    <View style={styles.searchRow}>
+      <TextInput
+      style={[styles.input, styles.searchInput]} // Apply specific styles for the search input
       placeholder="Search by Username"
       value={searchTerm}
       onChangeText={setSearchTerm}
-    />
-    <Button title="Search" onPress={fetchUsers} />
-
-    {/* Button to Add User */}
-    <Button title="Add User" onPress={() => setShowModal(true)} />
+      />
+      <Button title="Search" onPress={fetchUsers} />
+      <Button title="Add User" onPress={() => setShowModal(true)} />
+    </View>
 
     {/* User List */}
     <FlatList
@@ -175,6 +174,21 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 10,
+  },
+  searchRow: {
+    flexDirection: 'row', // Align elements in a row
+    alignItems: 'center', // Vertically center the items
+    marginBottom: 20,
+  },
+  searchInput: {
+    flex: 1, // Occupies the remaining space in the row
+    marginRight: 10, // Adds space between the input and the buttons
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    borderRadius: 5,
   },
   row: {
     flexDirection: 'row',
