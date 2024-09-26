@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TextInput, Button, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TextInput, Button, TouchableOpacity, Modal, ScrollView } from 'react-native';
 import axios from 'axios';
 
 const UserManagement = () => {
@@ -7,7 +7,10 @@ const UserManagement = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showForm, setShowForm] = useState(false); 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState(null);
 
   useEffect(() => {
     fetchUsers();
@@ -20,16 +23,27 @@ const UserManagement = () => {
   };
 
   const addUser = () => {
-    axios.post('http://localhost:5000/users', { username, email, password })
-      .then(response => {
-        console.log('User added', response.data);
-        setUsername('');
-        setEmail('');
-        setPassword('');
-        setShowForm(false); // Ẩn form sau khi thêm người dùng
-        fetchUsers();
-      })
-      .catch(error => console.error(error));
+    const newUser = { username, email, password };
+
+    if (editMode) {
+      // Update existing user
+      axios.put(`http://localhost:5000/users/${currentUserId}`, newUser)
+        .then(response => {
+          console.log('User updated', response.data);
+          resetForm();
+          fetchUsers();
+        })
+        .catch(error => console.error(error));
+    } else {
+      // Add new user
+      axios.post('http://localhost:5000/users', newUser)
+        .then(response => {
+          console.log('User added', response.data);
+          resetForm();
+          fetchUsers();
+        })
+        .catch(error => console.error(error));
+    }
   };
 
   const deleteUser = (userId) => {
@@ -41,43 +55,88 @@ const UserManagement = () => {
       .catch(error => console.error(error));
   };
 
-  const toggleForm = () => {
-    setShowForm(!showForm); // Hiển thị/Ẩn form khi nhấn nút
+  const editUser = (user) => {
+    setUsername(user.username);
+    setEmail(user.email);
+    setPassword(user.password);
+    setCurrentUserId(user._id);
+    setEditMode(true);
+    setShowModal(true);
+  };
+
+  const resetForm = () => {
+    setUsername('');
+    setEmail('');
+    setPassword('');
+    setCurrentUserId(null);
+    setEditMode(false);
+    setShowModal(false);
+  };
+
+  const filterUsers = () => {
+    if (searchTerm) {
+      return users.filter(user => user.username.toLowerCase().includes(searchTerm.toLowerCase()));
+    }
+    return users;
   };
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>User Management</Text>
-      <FlatList
-        data={users}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => (
-          <View style={styles.row}>
-            <Text style={styles.cell}>{item.username}</Text>
-            <Text style={styles.cell}>{item.email}</Text>
-            <TouchableOpacity
-              style={styles.deleteButton}
-              onPress={() => deleteUser(item._id)}
-            >
-              <Text style={styles.deleteButtonText}>Delete</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        ListHeaderComponent={() => (
-          <View style={styles.header}>
-            <Text style={styles.headerCell}>Username</Text>
-            <Text style={styles.headerCell}>Email</Text>
-            <Text style={styles.headerCell}>Action</Text>
-          </View>
-        )}
-      />
+    <Text style={styles.title}>User Management</Text>
 
-      {/* Nút để hiện form */}
-      <Button title={showForm ? "Hide Form" : "Add User"} onPress={toggleForm} />
+    {/* Search Field */}
+    <TextInput
+      style={styles.input}
+      placeholder="Search by Username"
+      value={searchTerm}
+      onChangeText={setSearchTerm}
+    />
+    <Button title="Search" onPress={fetchUsers} />
 
-      {showForm && (
-        <View style={styles.formContainer}>
-          <Text style={styles.title}>Add New User</Text>
+    {/* Button to Add User */}
+    <Button title="Add User" onPress={() => setShowModal(true)} />
+
+    {/* User List */}
+    <FlatList
+      data={filterUsers()}
+      keyExtractor={(item) => item._id}
+      renderItem={({ item }) => (
+        <View style={styles.row}>
+          <Text style={styles.cell}>{item.username}</Text>
+          <Text style={styles.cell}>{item.email}</Text>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => editUser(item)}
+          >
+            <Text style={styles.editButtonText}>Edit</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={() => deleteUser(item._id)}
+          >
+            <Text style={styles.deleteButtonText}>Delete</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      ListHeaderComponent={() => (
+        <View style={styles.header}>
+          <Text style={styles.headerCell}>Username</Text>
+          <Text style={styles.headerCell}>Email</Text>
+          <Text style={styles.headerCell}>Actions</Text>
+        </View>
+      )}
+    />
+
+    {/* Modal for Add/Edit User Form */}
+    <Modal
+      visible={showModal}
+      animationType="slide"
+      transparent={true}
+      onRequestClose={() => setShowModal(false)}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <Text style={styles.title}>{editMode ? 'Edit User' : 'Add New User'}</Text>
           <TextInput
             style={styles.input}
             placeholder="Username"
@@ -97,10 +156,12 @@ const UserManagement = () => {
             value={password}
             onChangeText={setPassword}
           />
-          <Button title="Submit" onPress={addUser} />
+          <Button title={editMode ? 'Update User' : 'Submit'} onPress={addUser} />
+          <Button title="Cancel" color="red" onPress={resetForm} />
         </View>
-      )}
-    </ScrollView>
+      </View>
+    </Modal>
+  </ScrollView>
     
   );
 };
@@ -144,6 +205,35 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 10,
     borderRadius: 5,
+  },
+  editButton: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    marginRight: 10,
+    borderRadius: 5,
+  },
+  editButtonText: {
+    color: '#fff',
+  },
+  deleteButton: {
+    backgroundColor: '#dc3545',
+    padding: 10,
+    borderRadius: 5,
+  },
+  deleteButtonText: {
+    color: '#fff',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    width: '80%',
+    padding: 20,
+    backgroundColor: 'white',
+    borderRadius: 10,
   },
 });
 

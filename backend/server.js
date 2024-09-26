@@ -56,6 +56,29 @@ app.delete('/users/:id', async (req, res) => {
   }
 });
 
+// PUT route to update user details by ID
+app.put('/users/:id', async (req, res) => {
+  try {
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET route to search users by username
+app.get('/users/search/:username', async (req, res) => {
+  try {
+    const users = await User.find({ username: new RegExp(req.params.username, 'i') });
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 // Dish Schema
 const dishSchema = new mongoose.Schema({
     name: String,
@@ -86,6 +109,29 @@ const dishSchema = new mongoose.Schema({
       res.status(400).json({ message: error.message });
     }
   });
+
+  // PUT route to update dish details by ID
+app.put('/dishes/:id', async (req, res) => {
+  try {
+    const updatedDish = await Dish.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!updatedDish) {
+      return res.status(404).json({ message: 'Dish not found' });
+    }
+    res.json(updatedDish);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// GET route to search dishes by name
+app.get('/dishes/search/:name', async (req, res) => {
+  try {
+    const dishes = await Dish.find({ name: new RegExp(req.params.name, 'i') });
+    res.json(dishes);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 // Sample route
 app.get('/', (req, res) => {
