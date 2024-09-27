@@ -1,5 +1,5 @@
 import 'react-native-gesture-handler'; 
-import React from 'react';
+import React, {useEffect} from 'react';
 import { StyleSheet, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createDrawerNavigator } from '@react-navigation/drawer';
@@ -32,10 +32,17 @@ export default function App() {
   );
 }
 
+const LogoutScreen = ({ navigation }) => {
+  useEffect(() => {
+    // Navigate back to the login screen when the component is mounted
+    navigation.replace('Login');
+  }, [navigation]);
+
+  return null; // This screen doesn't render anything
+};
+
 const DrawerNavigator = ({navigation}) => {
-  const handleLogout = () => {
-    navigation.navigate('Login');
-  };
+  
   return(
   <Drawer.Navigator
     initialRouteName="UserManagement"
@@ -71,16 +78,13 @@ const DrawerNavigator = ({navigation}) => {
     />
     <Drawer.Screen
         name="Log Out"
-        component={() => null} 
+        component={LogoutScreen} 
         options={{
           drawerIcon: ({ focused, size }) => (
             <Icon name="log-out" size={size} color={focused ? '#e91e63' : '#000'} />
           ),
           drawerItemStyle: { height: 60 }, 
           title: 'Log Out', 
-        }}
-        listeners={{
-          drawerPress: () => handleLogout(),
         }}
       />
   </Drawer.Navigator>
