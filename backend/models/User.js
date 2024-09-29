@@ -10,7 +10,7 @@ const UserSchema = new mongoose.Schema({
         type: String, 
         enum: ['admin', 'user'],  // Các giá trị cho role
         default: 'user'  // Gán giá trị mặc định
-    },  // 0 for admin, 1 for user
+    },  
     token: { type: String, default: null }  // Token để phân quyền (nếu cần trong tương lai)
 });
 

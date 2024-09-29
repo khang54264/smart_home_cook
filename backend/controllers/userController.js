@@ -2,7 +2,7 @@ const User = require('../models/User');
 
   // Đăng nhập
   exports.login = async (req, res) => {
-    const { usernameOrEmail = '', password } = req.query; // Lấy từ query parameters
+    const { usernameOrEmail = '', password } = req.body; // Lấy từ query parameters
   
       try {
           // Tìm kiếm người dùng theo `username` hoặc `email`
@@ -15,7 +15,7 @@ const User = require('../models/User');
           });
   
           if (!user) {
-              return res.status(404).json({ message: 'User not found' + user });
+              return res.status(404).json({ message: 'User not found ' + user });
           }
   
           // So sánh mật khẩu với mật khẩu trong database
@@ -76,14 +76,18 @@ const User = require('../models/User');
       const userCount = await User.countDocuments();
   
       // Tạo tên cho người dùng mới
-      const newName = `User${userCount + 1}`;  // Tính toán tên mới
+      if (req.body.name.trim() === '' || req.body.name === null ) {
+        name = `User${userCount + 1}`;  // Tính toán tên mới
+      } else {
+        name = req.body.name;
+      }
   
       const newUser = new User({
         username: req.body.username,
         password: req.body.password,  
-        name: newName,
+        name: name,
         email: req.body.email, 
-        role: req.body.role || 1,     // Set role; default là 1 (user)
+        role: req.body.role || 'user',     // Set role; default là 1 (user)
         token: req.body.token || null 
       });
   

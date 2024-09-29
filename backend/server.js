@@ -6,8 +6,12 @@ const bodyParser = require('body-parser');
 //Khởi tạo ứng dụng
 const app = express();
 
+const PORT = 5000;
+
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:8081'];
+
 app.use(cors({
-  origin: 'http://localhost:3000', //Kết nối tới frontend ở port 3000
+  origin: allowedOrigins, //Kết nối tới frontend 
   methods: ['GET','POST','PUT','DELETE','OPTIONS'], //Các phương thức HTTP được phép
   credentials: true,
 }));
@@ -20,8 +24,6 @@ const dishRoutes = require('./routes/dish');
 
 app.use('/users', userRoutes);
 app.use('/dishes', dishRoutes);
-
-const PORT = 5000;
 
 // MongoDB connection
 mongoose.connect('mongodb://localhost:27017/homecook')

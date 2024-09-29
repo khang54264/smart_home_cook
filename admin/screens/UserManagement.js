@@ -24,7 +24,7 @@ const UserManagement = () => {
   };
 
   const addUser = () => {
-    const newUser = { username, email, password };
+    const newUser = { username, password, name, email };
 
     if (editMode) {
       // Update existing user
@@ -43,9 +43,11 @@ const UserManagement = () => {
           resetForm();
           fetchUsers();
         })
-        .catch(error => console.error(error));
-    }
-  };
+        .catch(error => {
+          console.error('Error adding user:', error.response?.data || error);
+    });
+    };
+  }
 
   const deleteUser = (userId) => {
     axios.delete(`http://localhost:5000/users/delete/${userId}`)
@@ -95,7 +97,7 @@ const UserManagement = () => {
   }
 
   const roleDefine = (role) => {
-    if (role == 1) {
+    if (role == 'user') {
       return 'User';
     } else {
       return 'Admin';
