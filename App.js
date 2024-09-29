@@ -1,3 +1,15 @@
+import 'react-native-gesture-handler'; 
+import React, {useEffect} from 'react';
+import { StyleSheet, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createStackNavigator } from '@react-navigation/stack';
+import UserManagement from './admin/screens/UserManagement';
+import DishManagement from './admin/screens/DishManagement';
+import Login from './admin/screens/Login';
+import { StatusBar } from 'expo-status-bar';
+import Icon from 'react-native-vector-icons/Ionicons';
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -20,18 +32,6 @@ const dishRoutes = require('./backend/routes/dish');
 
 app.use('/users', userRoutes);
 app.use('/dishes', dishRoutes);
-
-import 'react-native-gesture-handler'; 
-import React, {useEffect} from 'react';
-import { StyleSheet, View } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { createStackNavigator } from '@react-navigation/stack';
-import UserManagement from './admin/screens/UserManagement';
-import DishManagement from './admin/screens/DishManagement';
-import Login from './admin/screens/Login';
-import { StatusBar } from 'expo-status-bar';
-import Icon from 'react-native-vector-icons/Ionicons';
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
