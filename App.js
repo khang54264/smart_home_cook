@@ -1,3 +1,26 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+
+//Khởi tạo ứng dụng
+const app = express();
+
+app.use(cors({
+  origin: 'http://localhost:3000', //Kết nối tới frontend ở port 3000
+  methods: ['GET','POST','PUT','DELETE','OPTIONS'], //Các phương thức HTTP được phép
+  credentials: true,
+}));
+app.options('*',cors());
+app.use(bodyParser.json());
+
+//Routes
+const userRoutes = require('./backend/routes/user');
+const dishRoutes = require('./backend/routes/dish');
+
+app.use('/users', userRoutes);
+app.use('/dishes', dishRoutes);
+
 import 'react-native-gesture-handler'; 
 import React, {useEffect} from 'react';
 import { StyleSheet, View } from 'react-native';

@@ -1,16 +1,33 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 
 const Login = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    
-    if (username === 'admin' && password === '123') {
-      navigation.replace('Drawer'); // Navigate to User Management
-    } else {
-      alert('Invalid credentials'); // Show an error message
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/users/login', {
+          usernameOrEmail: username,
+          password: password,
+      });
+
+      const data = response.data;
+      console.log(data);
+      
+      if (response.status === 200) {
+        // Login thành công khi role là admin (role admin)
+        if (data.user.role === 'admin') {
+          navigation.replace('Drawer'); // Đi tới trang quản lý
+        } else {
+          Alert.alert('Error', 'Only admins can log in');
+        }
+      } else {
+        Alert.alert('Error', data.message || 'Invalid credentials');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Something went wrong. Please try again.');
+      console.error(error); // Log lỗi để biết vấn đề
     }
   };
 
@@ -19,7 +36,7 @@ const Login = ({ navigation }) => {
       <Text style={styles.title}>Login</Text>
       <TextInput
         style={styles.input}
-        placeholder="Username"
+        placeholder="Username or Email"
         value={username}
         onChangeText={setUsername}
       />
