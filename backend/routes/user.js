@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const userController = requite('../controllers/userController');
+const userController = require('../controllers/userController');
 
 // Đăng nhập
 router.post('/login', userController.login);
@@ -18,6 +18,6 @@ router.delete('/delete/:_id', userController.deleteUser);
 router.put('/update/:_id', userController.updateUser);
 
 // Tìm kiếm User
-route.get('/search', userController.searchUser);
+router.get('/search', userController.searchUser);
 
 module.exports = router;

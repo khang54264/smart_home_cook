@@ -40,7 +40,7 @@ exports.updateDish = async (req, res) => {
 };
 
 // GET route to search dishes by name
-exports.seachDish = async (req, res) => {
+exports.searchDish = async (req, res) => {
   try {
     const dishes = await Dish.find({ name: new RegExp(req.params.name, 'i') });
     res.json(dishes);

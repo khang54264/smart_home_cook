@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const dishController = requite('../controllers/dishController');
+const dishController = require('../controllers/dishController');
 
 // Lấy toàn bộ công thức nấu ăn
 router.get('/', dishController.getAllDish);

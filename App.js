@@ -10,29 +10,6 @@ import Login from './admin/screens/Login';
 import { StatusBar } from 'expo-status-bar';
 import Icon from 'react-native-vector-icons/Ionicons';
 
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const bodyParser = require('body-parser');
-
-//Khởi tạo ứng dụng
-const app = express();
-
-app.use(cors({
-  origin: 'http://localhost:3000', //Kết nối tới frontend ở port 3000
-  methods: ['GET','POST','PUT','DELETE','OPTIONS'], //Các phương thức HTTP được phép
-  credentials: true,
-}));
-app.options('*',cors());
-app.use(bodyParser.json());
-
-//Routes
-const userRoutes = require('./backend/routes/user');
-const dishRoutes = require('./backend/routes/dish');
-
-app.use('/users', userRoutes);
-app.use('/dishes', dishRoutes);
-
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
 
