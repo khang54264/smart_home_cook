@@ -1,19 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const Dish = require('../models/Dish');
+const dishController = requite('../controllers/dishController');
 
-// Create dish
-router.post('/create', async (req, res) => {
-    const { name, kcal_quantity, protein, fat, carbs, ingredients } = req.body;
-    const newDish = new Dish({ name, kcal_quantity, protein, fat, carbs, ingredients });
-    await newDish.save();
-    res.json(newDish);
-});
+// Lấy toàn bộ công thức nấu ăn
+router.get('/', dishController.getAllDish);
 
-// Get all dishes
-router.get('/', async (req, res) => {
-    const dishes = await Dish.find();
-    res.json(dishes);
-});
+  // Thêm công thức nấu ăn
+router.post('/create', dishController.addDish);
+
+//Chỉnh sửa công thức nấu ăn
+router.put('/dishes/:id', dishController.updateDish);
+
+//Tìm kiếm công thức nấu ăn
+router.get('/search', dishController.searchDish);
 
 module.exports = router;
