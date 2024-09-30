@@ -6,6 +6,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
 import UserManagement from './admin/screens/UserManagement';
 import DishManagement from './admin/screens/DishManagement';
+import IngredientManagement from './admin/screens/IngredientManagement';
 import Login from './admin/screens/Login';
 import { StatusBar } from 'expo-status-bar';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -73,6 +74,15 @@ const DrawerNavigator = ({navigation}) => {
       options={{
         drawerIcon: ({ focused, size }) => (
           <Icon name="restaurant" size={size} color={focused ? '#e91e63' : '#000'} />
+        ),
+      }}
+    />
+    <Drawer.Screen
+      name="Ingredient Management"
+      component={IngredientManagement}
+      options={{
+        drawerIcon: ({ focused, size }) => (
+          <Icon name="leaf" size={size} color={focused ? '#e91e63' : '#000'} />
         ),
       }}
     />

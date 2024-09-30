@@ -1,17 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TextInput, Button, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { Ionicons } from '@expo/vector-icons'; 
+import { View, Text, FlatList, StyleSheet, TextInput, Button, TouchableOpacity, Modal, ScrollView, Picker } from 'react-native';
 import axios from 'axios';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
+  const [searchusers, setSearchUsers] = useState([]);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [role, setRole] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -23,31 +27,37 @@ const UserManagement = () => {
       .catch(error => console.error(error));
   };
 
-  const addUser = () => {
-    const newUser = { username, password, name, email };
-
-    if (editMode) {
-      // Update existing user
-      axios.put(`http://localhost:5000/users/update/${currentUserId}`, newUser)
-        .then(response => {
-          console.log('User updated', response.data);
-          resetForm();
-          fetchUsers();
-        })
-        .catch(error => console.error(error));
-    } else {
-      // Add new user
-      axios.post('http://localhost:5000/users/create', newUser)
-        .then(response => {
-          console.log('User added', response.data);
-          resetForm();
-          fetchUsers();
-        })
-        .catch(error => {
-          console.error('Error adding user:', error.response?.data || error);
-    });
-    };
+  const searchUsers = () => {
+    axios.get('http://localhost:5000/users/search')
+      .then(response => setSearchUsers(response.data))
+      .catch(error => console.error(error));
   }
+
+  const addUser = () => {
+    try {
+      const newUser = { username, password, name, email, ...(editMode && { role }) }; // Chỉ thêm role nếu editMode là true
+      if (editMode) {
+        // chỉnh sửa user
+        axios.put(`http://localhost:5000/users/update/${currentUserId}`, newUser)
+          .then(response => {
+            console.log('User updated', response.data);
+            resetForm();
+            fetchUsers();
+          })
+          .catch(error => console.error(error));
+      } else {
+        // Thêm user
+        axios.post('http://localhost:5000/users/create', newUser)
+          .then(response => {
+            console.log('User added', response.data);
+            resetForm();
+            fetchUsers();
+          })  
+      }
+    } catch (error) {
+      console.error('Error adding user:', error.response.data);
+    }};
+  
 
   const deleteUser = (userId) => {
     axios.delete(`http://localhost:5000/users/delete/${userId}`)
@@ -63,6 +73,8 @@ const UserManagement = () => {
     setEmail(user.email);
     setPassword(user.password);
     setCurrentUserId(user._id);
+    setName(user.name);
+    setRole(user.role);
     setEditMode(true);
     setShowModal(true);
   };
@@ -71,8 +83,10 @@ const UserManagement = () => {
     setUsername('');
     setEmail('');
     setPassword('');
+    setName('');
     setCurrentUserId(null);
     setEditMode(false);
+    setShowPassword(false);
     setShowModal(false);
   };
 
@@ -140,7 +154,7 @@ const UserManagement = () => {
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.deleteButton}
-              onPress={() => deleteUser(item.user_id)}
+              onPress={() => deleteUser(item._id)}
             >
               <Text style={styles.deleteButtonText}>Delete</Text>
             </TouchableOpacity>
@@ -174,14 +188,24 @@ const UserManagement = () => {
             placeholder="Username"
             value={username}
             onChangeText={setUsername}
+            editable={!editMode}
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="Password"
+              secureTextEntry={!showPassword} // Sử dụng trạng thái showPassword để điều chỉnh secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.passwordIcon}>
+              <Ionicons 
+                name={showPassword ? 'eye-off' : 'eye'} 
+                size={24} 
+                color="black"
+              />
+            </TouchableOpacity>
+          </View>
           <TextInput
             style={styles.input}
             placeholder="Name"
@@ -194,9 +218,19 @@ const UserManagement = () => {
             value={email}
             onChangeText={setEmail}
           />
-          
-          <Button title={editMode ? 'Update User' : 'Submit'} onPress={addUser} />
-          <Button title="Cancel" color="red" onPress={resetForm} />
+          {/* Droplist để chọn role cho User (chỉ hiển thị khi editMode = true) */}
+          {editMode && (
+            <Picker
+              selectedValue={role}
+              onValueChange={(itemValue) => setRole(itemValue)}
+              style={styles.picker}
+            >
+              <Picker.Item label="User" value="user" />
+              <Picker.Item label="Admin" value="admin" />
+            </Picker>
+          )}
+          <Button style={styles.modalButton} title={editMode ? 'Update User' : 'Submit'} onPress={addUser} />
+          <Button style={styles.modalButton} title="Cancel" color="red" onPress={resetForm} />
         </View>
       </View>
     </Modal>
@@ -235,7 +269,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
     alignItems: 'center',
-    paddingVertical: 10, // Căn giữa hàng dọc cho nút
+    paddingVertical: 5, // Căn giữa hàng dọc cho nút
     padding: 10,
   },
   usercell: {
@@ -376,6 +410,14 @@ const styles = StyleSheet.create({
   editButtonText: {
     color: '#fff',
   },
+  picker: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+    marginBottom: 10,
+    font: 12,
+    height: 40,
+  },
   deleteButton: {
     backgroundColor: '#dc3545',
     padding: 10,
@@ -385,6 +427,23 @@ const styles = StyleSheet.create({
   deleteButtonText: {
     color: '#fff',
   },
+  passContainer: {
+    width: '80%',  
+    paddingBottom: 20,
+  },
+  passwordInput: {
+    width: '100%', 
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  passwordIcon: {
+    position: 'absolute',
+    right: 10, 
+    top: 8, 
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -392,10 +451,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    width: '80%',
+    width: '40%',
     padding: 20,
     backgroundColor: 'white',
     borderRadius: 10,
+  },
+  modalButton: {
+    marginVertical: 5, // Tạo khoảng cách giữa các nút
+    marginBottom: 10,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    width: '100%', // Để nút có chiều rộng đầy đủ của modal
   },
 });
 

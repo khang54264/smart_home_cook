@@ -58,7 +58,7 @@ const User = require('../models/User');
   //Tạo user mới
   exports.createUser = async (req, res) => {
     try {
-      const { username, password, name, email, role, token } = req.body;
+      const { username, password, name, email } = req.body;
   
       // Kiểm tra xem username đã tồn tại hay chưa
       const existingUser = await User.findOne({ username });
@@ -76,19 +76,16 @@ const User = require('../models/User');
       const userCount = await User.countDocuments();
   
       // Tạo tên cho người dùng mới
-      if (req.body.name.trim() === '' || req.body.name === null ) {
-        name = `User${userCount + 1}`;  // Tính toán tên mới
-      } else {
-        name = req.body.name;
-      }
+      const finalName = (!name || name === '') ? `User${userCount + 1}` : name;
   
       const newUser = new User({
-        username: req.body.username,
-        password: req.body.password,  
-        name: name,
-        email: req.body.email, 
-        role: req.body.role || 'user',     // Set role; default là 1 (user)
-        token: req.body.token || null 
+        username: username,
+        password: password,  
+        name: finalName,
+        email: email, 
+        role: 'user',     // Set role; default là user
+        token: null,
+        time_created: Date.now(),
       });
   
       const savedUser = await newUser.save();
@@ -101,8 +98,9 @@ const User = require('../models/User');
   // Xóa User
   exports.deleteUser = async (req, res) => {
     try {
-      const user = await User.findByIdAndDelete(req.params._id);
-      if (!user) {
+      const userId = req.params._id;
+      const deleteuser = await User.findByIdAndDelete(userId);
+      if (!deleteuser) {
         return res.status(404).json({ message: 'User not found' });
       }
       res.json({ message: 'User deleted successfully' });
@@ -114,7 +112,12 @@ const User = require('../models/User');
   // Chỉnh sửa User
   exports.updateUser = async (req, res) => {
     try {
-      const updatedUser = await User.findByIdAndUpdate(req.params._id, req.body, { new: true });
+      const { username, password, name, email, role } = req.body;
+      const updatedUser = await User.findByIdAndUpdate(
+        req.params._id,
+        { username, password, name, email, role }, // Cập nhật tất cả các trường
+        { new: true }
+      );
       if (!updatedUser) {
         return res.status(404).json({ message: 'User not found' });
       }
@@ -127,7 +130,9 @@ const User = require('../models/User');
   // Tìm kiếm User
   exports.searchUser = async (req, res) => {
     try {
-      const users = await User.find({ username: new RegExp(req.params.username, 'i') });
+      const users = await User.find({ 
+        username: new RegExp(req.params.username, 'i') 
+      });
       res.json(users);
     } catch (error) {
       res.status(500).json({ message: error.message });
