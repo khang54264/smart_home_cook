@@ -50,7 +50,7 @@ const DrawerNavigator = ({navigation}) => {
     screenOptions={{
       drawerStyle: {
         backgroundColor: '#f0f0f0',
-        width: 300,
+        width: 350,
       },
       drawerActiveTintColor: '#e91e63',
       drawerInactiveTintColor: '#000',

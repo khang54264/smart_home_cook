@@ -1,22 +1,31 @@
 const Ingredient = require('../models/Ingredient');
 
 //Lấy toàn bộ nguyên liệu
-exports.getAllIngre = async (req, res) => {
+exports.getIngre = async (req, res) => {
     try {
     const page = parseInt(req.query.page) || 1; // Lấy trang hiện tại
     const limit = parseInt(req.query.limit) || 7; // Số lượng phần tử mỗi trang
     const skip = (page - 1) * limit; // Bỏ qua những phần tử trước đó
+    const search = req.query.search || ''; //Tìm kiếm
 
     // Đếm tổng số nguyên liệu
-    const totalIngredients = await Ingredient.countDocuments();
+    const totalIngredients = await Ingredient.countDocuments({ 
+      name: new RegExp(search, 'i') 
+    });
+    const totalPages = Math.ceil(totalIngredients / limit);
 
     // Lấy danh sách nguyên liệu với phân trang
-    const ingredients = await Ingredient.find().skip(skip).limit(limit);
+    const ingredients = await Ingredient.find({ 
+      name: new RegExp(search, 'i') 
+    })
+      .skip((page - 1) * limit)
+      .limit(limit);
 
     // Trả về danh sách và tổng số trang
     res.status(200).json({
       ingredients,
-      totalPages: Math.ceil(totalIngredients / limit),
+      totalPages,
+      currentPage: page, //Gửi về trang hiện tại
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -4,7 +4,7 @@ const ingredientController = require('../controllers/ingredientController');
 
 
 // Lấy toàn bộ nguyên liệu
-router.get('/getall', ingredientController.getAllIngre);
+router.get('/get', ingredientController.getIngre);
 
 // Thêm nguyên liệu mới
 router.post('/add', ingredientController.addIngre);
@@ -15,7 +15,5 @@ router.delete('/delete/:_id', ingredientController.deleteIngre);
 // Chỉnh sửa thông tin nguyên liệu
 router.put('/update/:_id', ingredientController.updateIngre);
 
-// Tìm kiếm nguyên liệu
-router.get('/search', ingredientController.searchIngre);
 
 module.exports = router;

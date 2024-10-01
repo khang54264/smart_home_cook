@@ -21,31 +21,35 @@ const IngredientManagement = () => {
   const [totalPages, setTotalPages] = useState(1);    
 
   useEffect(() => {
-    if (searchTerm) {
-        const filteredIngredients = ingredients.filter(ingre =>
-          ingre.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-        setIngredients(filteredIngredients);
-      } else {
-        fetchIngredient();
-      }
-    }, [searchTerm]);
+    fetchIngredient(currentPage,'');
+  }, [currentPage, searchTerm]);
 
-  const fetchIngredient = () => {
-    axios.get('http://localhost:5000/ingredients/getall', {
-        params: {
-          page: currentPage,
-          limit: itemsPerPage
-        }
-      })
+  const fetchIngredient = (currentPage, searchTerm = '') => {
+    axios.get(`http://localhost:5000/ingredients/get?page=${currentPage}&limit=7&search=${searchTerm}`)
       .then((response) => {
-        setIngredients(response.data.ingredients); // Lưu danh sách ingredients
-        setTotalPages(response.data.totalPages); // Tổng số trang được trả về từ API
+        setIngredients(response.data.ingredients); 
+        setTotalPages(response.data.totalPages); 
       })
       .catch((error) => console.error(error));
   };
+  
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchIngredient(1, searchTerm); // Fetch dữ liệu từ đầu khi tìm kiếm
+    setCurrentPage(1);
+    fetchIngredient(1, searchTerm); 
+  };
+
+  const validateInput = () => {
+    if (!name || !carb || !xo || !fat || !protein || !kcal) {
+      alert("Vui lòng nhập đủ thông tin");
+      return false;
+    }
+    return true;
+  };
 
   const addIngredient = () => {
+    if (!validateInput()) return;
     try {
       const newIngre = { name, carb, xo, fat, protein, kcal};
       if (editMode) {
@@ -54,20 +58,27 @@ const IngredientManagement = () => {
           .then(response => {
             console.log('Ingredient updated', response.data);
             resetForm();
-            fetchIngredient();
+            fetchIngredient(currentPage,'');
           })
-          .catch(error => console.error(error));
+          .catch(error => {
+            console.error('Error updating ingredient:', error);
+            alert('Failed to update ingredient. Please try again.');
+          });
       } else {
         // Thêm ingredient
         axios.post('http://localhost:5000/ingredients/add', newIngre)
           .then(response => {
             console.log('Ingredient added', response.data);
             resetForm();
-            fetchIngredient();
-          })  
+            fetchIngredient(currentPage,'');
+          }) .catch(error => {
+            console.error('Error adding ingredient:', error);
+            alert('Failed to add ingredient. Please try again.');
+      }); 
       }
     } catch (error) {
-      console.error('Error adding ingredient:', error.response.data);
+      console.error('Unexpected error:', error);
+      alert('An unexpected error occurred. Please try again.');
     }};
   
 
@@ -75,7 +86,7 @@ const IngredientManagement = () => {
     axios.delete(`http://localhost:5000/ingredients/delete/${IngreId}`)
       .then(response => {
         console.log('Ingredient deleted', response.data);
-        fetchIngredient(); // Cập nhật danh sách sau khi xóa nguyên liệu
+        fetchIngredient(currentPage,''); // Cập nhật danh sách sau khi xóa nguyên liệu
       })
       .catch(error => console.error(error));
   };
@@ -104,32 +115,26 @@ const IngredientManagement = () => {
     setShowModal(false);
   };
 
-  const filterIngre = () => {
-  if (searchTerm) {
-    const filteredIngredients = ingredients.filter(ingre => 
-      ingre.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    return paginate(filteredIngredients, currentPage, itemsPerPage);
-  }
-  return paginate(ingredients, currentPage, itemsPerPage);
-};
-
-const paginate = (items, page, perPage) => {
-  const startIndex = (page - 1) * perPage;
-  return items.slice(startIndex, startIndex + perPage);
-};
-
 const handlePreviousPage = () => {
     if (currentPage > 1) {
-      setCurrentPage(prevPage => prevPage - 1);
+      setCurrentPage(currentPage-1);
+      fetchIngredient(currentPage,'');
+    } else {
+      setCurrentPage(1);
+      fetchIngredient(currentPage,'');
     }
   };
   
   const handleNextPage = () => {
     if (currentPage < totalPages) {
-      setCurrentPage(prevPage => prevPage + 1);
+      setCurrentPage(currentPage+1);
+      fetchIngredient(currentPage,'');
+    } else {
+      setCurrentPage(totalPages);
+      fetchIngredient(currentPage,'');
     }
   };
+
 
   return (
     <ScrollView style={styles.container}>
@@ -142,13 +147,13 @@ const handlePreviousPage = () => {
       value={searchTerm}
       onChangeText={setSearchTerm}
       />
-      <Button title="Search" onPress={fetchIngredient} />
+      <Button title="Search" onPress={handleSearch} />
       <Button title="Add Ingredient" onPress={() => setShowModal(true)} />
     </View>
 
     {/* User List */}
     <FlatList
-      data={filterIngre()}
+      data={ingredients}
       keyExtractor={(item) => item._id}
       renderItem={({ item }) => (
         <View style={styles.row}>
@@ -203,7 +208,7 @@ const handlePreviousPage = () => {
     {/* Modal for Add/Edit Ingredient Form */}
     <Modal
       visible={showModal}
-      animationType="slide"
+      animationType="fade"
       transparent={true}
       onRequestClose={() => setShowModal(false)}
     >
@@ -468,7 +473,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modalContent: {
-    width: '40%',
+    width: '90%',  // Đảm bảo modal sẽ phù hợp với màn hình nhỏ hơn
+    maxWidth: 600, // Giới hạn chiều rộng modal trên màn hình lớn
     padding: 20,
     backgroundColor: 'white',
     borderRadius: 10,
@@ -485,16 +491,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 20,
+    marginVertical: 10,
   },
   paginationButton: {
-    marginHorizontal: 10,
-    padding: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
     backgroundColor: '#007bff',
     borderRadius: 5,
+    marginHorizontal: 5,
   },
   paginationText: {
     color: '#000',
+    fontWeight: 'bold',
     fontSize: 16,
   }
 });
