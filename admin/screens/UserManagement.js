@@ -171,6 +171,19 @@ const UserManagement = () => {
           <Text style={styles.actionheaderCell}>Actions</Text>
         </View>
       )}
+      ListFooterComponent={() => (
+        <View style={styles.paginationContainer}>
+          <TouchableOpacity style={styles.paginationButton}  >
+            <Text style={styles.paginationText}>Previous</Text>
+          </TouchableOpacity>
+    
+          <Text style={styles.paginationText}>Page of </Text>
+
+          <TouchableOpacity style={styles.paginationButton} >
+            <Text style={styles.paginationText}>Next</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     />
 
     {/* Modal for Add/Edit User Form */}
@@ -463,6 +476,24 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
     width: '100%', // Để nút có chiều rộng đầy đủ của modal
+  },
+  paginationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  paginationButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    backgroundColor: '#007bff',
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  paginationText: {
+    color: '#000',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
 

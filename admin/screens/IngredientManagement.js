@@ -504,7 +504,7 @@ const styles = StyleSheet.create({
     color: '#000',
     fontWeight: 'bold',
     fontSize: 16,
-  }
+  },
 });
 
 export default IngredientManagement;
