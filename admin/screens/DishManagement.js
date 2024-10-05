@@ -13,6 +13,9 @@ const DishManagement = () => {
   const [kcal, setKcal] = useState('');
   const [cuisineType, setCuisineType] = useState('');
   const [nutritions, setNutritions] = useState('');
+  const [availableIngredients, setAvailableIngredients] = useState([]); // Dữ liệu nguyên liệu từ kho
+  const [selectedIngredients, setSelectedIngredients] = useState([]); // Nguyên liệu đã chọn
+  const [ingredientInput, setIngredientInput] = useState(''); // Giá trị trong TextInput
   const [ingredients, setIngredients] = useState([]);
   const [ingredientAmount, setIngredientAmount] = useState('');
   const [steps, setSteps] = useState([]);
