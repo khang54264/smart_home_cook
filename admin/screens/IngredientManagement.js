@@ -48,7 +48,7 @@ const IngredientManagement = () => {
     return true;
   };
 
-  const addIngredient = () => {
+  const validateIngredient = () => {
     if (!validateInput()) return;
     try {
       const newIngre = { name, carb, xo, fat, protein, kcal};
@@ -255,7 +255,7 @@ const handlePreviousPage = () => {
             value={kcal}
             onChangeText={setKcal}
           />
-          <Button style={styles.modalButton} title={editMode ? 'Update Ingredient' : 'Submit'} onPress={addIngredient} />
+          <Button style={styles.modalButton} title={editMode ? 'Update Ingredient' : 'Submit'} onPress={validateIngredient} />
           <Button style={styles.modalButton} title="Cancel" color="red" onPress={resetForm} />
         </View>
       </View>
@@ -403,12 +403,13 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     padding: 10,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#000000',
     borderBottomWidth: 2,
     borderBottomColor: '#ddd',
     alignItems: 'center',
   },
   nameheaderCell: {
+    color: '#ffffff',
     flex: 1,
     fontWeight: 'bold',
     fontSize: 16,
@@ -418,6 +419,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   carbheaderCell: {
+    color: '#ffffff',
     flex: 1,
     fontWeight: 'bold',
     fontSize: 16,
@@ -427,6 +429,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   xoheaderCell: {
+    color: '#ffffff',
     flex: 1,
     fontWeight: 'bold',
     fontSize: 16,
@@ -436,6 +439,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   fatheaderCell: {
+    color: '#ffffff',
     flex: 1,
     fontWeight: 'bold',
     fontSize: 16,
@@ -445,6 +449,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   proteinheaderCell: {
+    color: '#ffffff',
     flex: 1,
     fontWeight: 'bold',
     fontSize: 16,
@@ -454,6 +459,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   kcalheaderCell: {
+    color: '#ffffff',
     flex: 1,
     fontWeight: 'bold',
     fontSize: 16,
@@ -463,6 +469,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   actionheaderCell: {
+    color: '#ffffff',
     width: 200,
     fontWeight: 'bold',
     fontSize: 16,

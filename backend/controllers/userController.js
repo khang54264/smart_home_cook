@@ -1,4 +1,10 @@
 const User = require('../models/User');
+//Các bảng tham chiếu
+const SearchHistory = require('../models/SearchHistory');
+const UserIngredient = require('../models/UserIngredient');
+const ShoppingList = require('../models/ShoppingList');
+const FavoriteRecipe = require('../models/FavoriteRecipe');
+const MealPlan = require('../models/MealPlan');
 
   // Đăng nhập
   exports.login = async (req, res) => {
@@ -23,10 +29,10 @@ const User = require('../models/User');
               return res.status(401).json({ message: 'Invalid password' });
           }
   
-          // Kiểm tra role (chỉ cho phép đăng nhập nếu role = 'admin')
-          if (user.role !== 'admin') {
-              return res.status(403).json({ message: 'You do not have permission to access this : role' + user.role });
-          }
+          // // Kiểm tra role (chỉ cho phép đăng nhập nếu role = 'admin')
+          // if (user.role !== 'admin') {
+          //     return res.status(403).json({ message: 'You do not have permission to access this : role' + user.role });
+          // }
   
           // Tạo token
           const token = user.token || 'your-generated-token'; // Thay bằng logic tạo token nếu cần
@@ -53,6 +59,44 @@ const User = require('../models/User');
   exports.getAllUser = async (req, res) => {
     const users = await User.find();
     res.json(users);
+};
+
+//Lấy người dùng theo trang
+exports.getUser = async (req, res) => {
+  try {
+  const page = parseInt(req.query.page) || 1; // Lấy trang hiện tại
+  const limit = parseInt(req.query.limit) || 7; // Số lượng phần tử mỗi trang
+  const skip = (page - 1) * limit; // Bỏ qua những phần tử trước đó
+  const search = req.query.search || ''; //Tìm kiếm
+
+  // Đếm tổng số người dùng
+  const totalUser = await User.countDocuments({ 
+    $or: [
+      {username: new RegExp(search, 'i')},
+      {email: new RegExp(search, 'i')}
+    ]
+  }).collation({ locale: 'vi', strength: 1 });
+  const totalPages = Math.ceil(totalUser / limit);
+
+  // Lấy danh sách người dùng với phân trang
+  const users = await User.find({ 
+    $or: [
+      {username: new RegExp(search, 'i')},
+      {email: new RegExp(search, 'i')}
+    ]
+  }).collation({ locale: 'vi', strength: 1 })
+    .skip((page - 1) * limit)
+    .limit(limit);
+
+  // Trả về danh sách và tổng số trang
+  res.status(200).json({
+    users: users,
+    totalPages,
+    currentPage: page, //Gửi về trang hiện tại
+  });
+} catch (error) {
+  res.status(500).json({ message: error.message });
+}
 };
   
   //Tạo user mới
@@ -109,7 +153,7 @@ const User = require('../models/User');
     }
   };
   
-  // Chỉnh sửa User
+  // Chỉnh sửa thông tin User
   exports.updateUser = async (req, res) => {
     try {
       const { username, password, name, email, role } = req.body;
@@ -122,6 +166,33 @@ const User = require('../models/User');
         return res.status(404).json({ message: 'User not found' });
       }
       res.json(updatedUser);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  };
+
+  // Thay đổi mật khẩu
+  exports.changePassword = async (req, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      const userId = req.user._id; // Lấy user ID từ token hoặc session, đảm bảo rằng người dùng đang đăng nhập
+  
+      // Tìm user trong cơ sở dữ liệu
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+  
+      // Kiểm tra mật khẩu hiện tại
+      if (currentPassword !== user.password) {
+        return res.status(401).json({ message: 'Wrong password' });
+    }
+  
+      // Cập nhật mật khẩu
+      user.password = newPassword;
+      await user.save();
+  
+      res.json({ message: 'Password changed successfully' });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }

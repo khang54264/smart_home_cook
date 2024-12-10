@@ -44,7 +44,7 @@ const TagManagement = () => {
     return true;
   };
 
-  const addTag = () => {
+  const validateTag = () => {
     if (!validateInput()) return;
     try {
       const newTag = { name, info};
@@ -131,7 +131,7 @@ const handlePreviousPage = () => {
     <View style={styles.searchRow}>
       <TextInput
       style={[styles.input, styles.searchInput]} 
-      placeholder="Search by Name"
+      placeholder="Search"
       value={searchTerm}
       onChangeText={setSearchTerm}
       />
@@ -209,7 +209,7 @@ const handlePreviousPage = () => {
             value={info}
             onChangeText={setInfo}
           />
-          <Button style={styles.modalButton} title={editMode ? 'Update Tag' : 'Submit'} onPress={addTag} />
+          <Button style={styles.modalButton} title={editMode ? 'Update Tag' : 'Submit'} onPress={validateTag} />
           <Button style={styles.modalButton} title="Cancel" color="red" onPress={resetForm} />
         </View>
       </View>
@@ -313,12 +313,13 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     padding: 10,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#000000',
     borderBottomWidth: 2,
     borderBottomColor: '#ddd',
     alignItems: 'center',
   },
   nameheaderCell: {
+    color: '#ffffff',
     flex: 1,
     fontWeight: 'bold',
     fontSize: 16,
@@ -328,6 +329,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   infoheaderCell: {
+    color: '#ffffff',
     flex: 1,
     fontWeight: 'bold',
     fontSize: 16,

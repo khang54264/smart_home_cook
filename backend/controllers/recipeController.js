@@ -14,6 +14,42 @@ exports.getAllRecipe = async (req, res) => {
     res.json(recipes);
 };
 
+//Lấy công thức nấu ăn theo trang
+exports.getRecipe = async (req, res) => {
+  try {
+  const page = parseInt(req.query.page) || 1; // Lấy trang hiện tại
+  const limit = parseInt(req.query.limit) || 7; // Số lượng phần tử mỗi trang
+  const skip = (page - 1) * limit; // Bỏ qua những phần tử trước đó
+  const search = req.query.search || ''; //Tìm kiếm
+
+  // Đếm tổng số công thức nấu ăn
+  const totalRecipe = await Recipe.countDocuments({ 
+    $or: [
+      {name: new RegExp(search, 'i')},
+    ]
+  }).collation({ locale: 'vi', strength: 1 });
+  const totalPages = Math.ceil(totalRecipe / limit);
+
+  // Lấy danh sách công thức nấu ăn với phân trang
+  const recipes = await Recipe.find({ 
+    $or: [
+      {name: new RegExp(search, 'i')},
+    ]
+  }).collation({ locale: 'vi', strength: 1 })
+    .skip((page - 1) * limit)
+    .limit(limit);
+
+  // Trả về danh sách và tổng số trang
+  res.status(200).json({
+    recipes: recipes,
+    totalPages,
+    currentPage: page, //Gửi về trang hiện tại
+  });
+} catch (error) {
+  res.status(500).json({ message: error.message });
+}
+};
+
 // Thêm công thức nấu ăn
 exports.addRecipe = async (req, res) => {
     const newRecipe = new Recipe({

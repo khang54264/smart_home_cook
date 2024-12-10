@@ -16,16 +16,22 @@ exports.getTag = async (req, res) => {
     const skip = (page - 1) * limit; // Bỏ qua những phần tử trước đó
     const search = req.query.search || ''; //Tìm kiếm
 
-    // Đếm tổng số nguyên liệu
+    // Đếm tổng số nhãn thẻ
     const totalTag = await Tag.countDocuments({ 
-      name: new RegExp(search, 'i')
-    });
+      $or: [
+        {name: new RegExp(search, 'i')},
+        {info: new RegExp(search, 'i')}
+      ]
+    }).collation({ locale: 'vi', strength: 1 });
     const totalPages = Math.ceil(totalTag / limit);
 
     // Lấy danh sách nhãn thẻ với phân trang
     const tags = await Tag.find({ 
-      name: new RegExp(search, 'i')
-    })
+      $or: [
+        {name: new RegExp(search, 'i')},
+        {info: new RegExp(search, 'i')}
+      ]
+    }).collation({ locale: 'vi', strength: 1 })
       .skip((page - 1) * limit)
       .limit(limit);
 

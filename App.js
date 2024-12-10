@@ -1,9 +1,11 @@
 import 'react-native-gesture-handler'; 
-import React, {useEffect} from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, {useEffect, useContext} from 'react';
+import { StyleSheet, View, Text } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { createStackNavigator } from '@react-navigation/stack';
+import { UserProvider } from './UserContext'; // Import UserProvider
+import { UserContext } from './UserContext'; // Import UserContext
 import UserManagement from './admin/screens/UserManagement';
 import RecipeManagement from './admin/screens/RecipeManagement';
 import IngredientManagement from './admin/screens/IngredientManagement';
@@ -17,8 +19,9 @@ const Stack = createStackNavigator();
 
 export default function App() {
   return (
+    <UserProvider>
     <NavigationContainer>
-    <Stack.Navigator initialRouteName="Drawer">
+    <Stack.Navigator initialRouteName="Login">
       <Stack.Screen 
         name="Login" 
         component={Login} 
@@ -31,6 +34,7 @@ export default function App() {
       />
     </Stack.Navigator>
   </NavigationContainer>
+  </UserProvider>
   );
 }
 
@@ -44,10 +48,21 @@ const LogoutScreen = ({ navigation }) => {
 };
 
 const DrawerNavigator = ({navigation}) => {
+  const { user } = useContext(UserContext); // Lấy thông tin người dùng từ context
   
+  const CustomDrawerContent = (props) => (
+    <DrawerContentScrollView {...props}>
+      <View style={styles.userInfo}>
+        <Text style={styles.userName}>Welcome, {user?.name || 'Admin'}</Text>
+      </View>
+      <DrawerItemList {...props} />
+    </DrawerContentScrollView>
+  );
+
   return(
   <Drawer.Navigator
     initialRouteName="UserManagement"
+    drawerContent={(props) => <CustomDrawerContent {...props} />}
     screenOptions={{
       drawerStyle: {
         backgroundColor: '#f0f0f0',
@@ -123,5 +138,15 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRightWidth: 1,
     borderRightColor: '#ddd',
+  },
+  userInfo: {
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
+    marginBottom: 10,
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: 'bold',
   },
 });

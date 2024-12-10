@@ -8,6 +8,9 @@ router.post('/login', userController.login);
 // Lấy toàn bộ User
 router.get('/getall', userController.getAllUser);
 
+// Lấy người dùng phân trang
+router.get('/get', userController.getUser);
+
 // Tạo user mới
 router.post('/create', userController.createUser);
 

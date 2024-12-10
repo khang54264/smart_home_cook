@@ -17,13 +17,13 @@ exports.getIngre = async (req, res) => {
       // Đếm tổng số nguyên liệu
       const totalIngredients = await Ingredient.countDocuments({ 
         name: new RegExp(search, 'i') 
-      });
+      }).collation({ locale: 'vi', strength: 1 });
       const totalPages = Math.ceil(totalIngredients / limit);
 
       // Lấy danh sách nguyên liệu với phân trang
       const ingredients = await Ingredient.find({ 
         name: new RegExp(search, 'i') 
-      })
+      }).collation({ locale: 'vi', strength: 1 })
         .skip((page - 1) * limit)
         .limit(limit);
 

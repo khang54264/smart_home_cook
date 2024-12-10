@@ -24,11 +24,13 @@ const userRoutes = require('./routes/user');
 const recipeRoutes = require('./routes/recipe');
 const ingredientRoutes = require('./routes/ingredient');
 const tagRoutes = require('./routes/tag');
+const stepRoutes = require('./routes/step');
 
 app.use('/users', userRoutes);
 app.use('/recipes', recipeRoutes);
 app.use('/ingredients', ingredientRoutes);
 app.use('/tags', tagRoutes);
+app.use('/steps', stepRoutes);
 
 // MongoDB connection   
 mongoose.connect('mongodb://localhost:27017/homecook')

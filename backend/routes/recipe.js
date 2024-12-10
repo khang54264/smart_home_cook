@@ -3,8 +3,11 @@ const router = express.Router();
 const recipeController = require('../controllers/recipeController');
 
 
-// Lấy công thức nấu ăn phân trang
+// Lấy toàn bộ công thức nấu ăn
 router.get('/getall', recipeController.getAllRecipe);
+
+// Lấy công thức nấu ăn phân trang
+router.get('/get', recipeController.getRecipe);
 
 // Thêm công thức nấu ăn
 router.post('/create', recipeController.addRecipe);

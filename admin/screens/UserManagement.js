@@ -16,24 +16,47 @@ const UserManagement = () => {
   const [editMode, setEditMode] = useState(false);
   const [currentUserId, setCurrentUserId] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [currentTagId, setCurrentTagId] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(7); // Số phần tử trên mỗi trang
+  const [totalPages, setTotalPages] = useState(1);    
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    fetchUsers(currentPage,searchTerm);
+  }, [currentPage, searchTerm]);
 
-  const fetchUsers = () => {
-    axios.get('http://localhost:5000/users/getall')
-      .then(response => setUsers(response.data))
+  const fetchUsers = (currentPage,searchTerm) => {
+    axios.get(`http://localhost:5000/users/get?page=${currentPage}&limit=7&search=${searchTerm}`)
+      .then((response) => {
+        setUsers(response.data.users);
+        setTotalPages(response.data.totalPages); 
+      })
       .catch(error => console.error(error));
   };
 
-  const searchUsers = () => {
-    axios.get('http://localhost:5000/users/search')
-      .then(response => setSearchUsers(response.data))
-      .catch(error => console.error(error));
-  }
+  // const searchUsers = () => {
+  //   axios.get('http://localhost:5000/users/search')
+  //     .then(response => setSearchUsers(response.data))
+  //     .catch(error => console.error(error));
+  // }
 
-  const addUser = () => {
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchUsers(1, searchTerm); // Fetch dữ liệu từ đầu khi tìm kiếm
+    setCurrentPage(1);
+    fetchUsers(1, searchTerm); 
+  };
+
+  const validateInput = () => {
+    if (!username || !password) {
+      alert("Vui lòng nhập đủ thông tin tên đăng nhập, mật khẩu");
+      return false;
+    }
+    return true;
+  };
+
+  const validateUser = () => {
+    if (!validateInput()) return;
     try {
       const newUser = { username, password, name, email, ...(editMode && { role }) }; // Chỉ thêm role nếu editMode là true
       if (editMode) {
@@ -42,17 +65,23 @@ const UserManagement = () => {
           .then(response => {
             console.log('User updated', response.data);
             resetForm();
-            fetchUsers();
+            fetchUsers(currentPage,'');
           })
-          .catch(error => console.error(error));
+          .catch(error => {
+            console.error('Error updating user:', error);
+            alert('Failed to update user. Please try again.');
+          });
       } else {
         // Thêm user
         axios.post('http://localhost:5000/users/create', newUser)
           .then(response => {
             console.log('User added', response.data);
             resetForm();
-            fetchUsers();
-          })  
+            fetchUsers(currentPage,'');
+          }) .catch(error => {
+            console.error('Error adding user:', error);
+            alert('Failed to add user. Please try again.');
+      }); 
       }
     } catch (error) {
       console.error('Error adding user:', error.response.data);
@@ -63,7 +92,7 @@ const UserManagement = () => {
     axios.delete(`http://localhost:5000/users/delete/${userId}`)
       .then(response => {
         console.log('User deleted', response.data);
-        fetchUsers(); // Cập nhật danh sách sau khi xóa người dùng
+        fetchUsers(currentPage,''); // Cập nhật danh sách sau khi xóa người dùng
       })
       .catch(error => console.error(error));
   };
@@ -90,12 +119,32 @@ const UserManagement = () => {
     setShowModal(false);
   };
 
-  const filterUsers = () => {
-    if (searchTerm) {
-      return users.filter(user => user.username.toLowerCase().includes(searchTerm.toLowerCase()));
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage-1);
+      fetchUsers(currentPage, searchTerm);
+    } else {
+      setCurrentPage(1);
+      fetchUsers(currentPage, searchTerm);
     }
-    return users;
   };
+  
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage+1);
+      fetchUsers(currentPage, searchTerm);
+    } else {
+      setCurrentPage(totalPages);
+      fetchUsers(currentPage, searchTerm);
+    }
+  };
+
+  // const filterUsers = () => {
+  //   if (searchTerm) {
+  //     return users.filter(user => user.username.toLowerCase().includes(searchTerm.toLowerCase()));
+  //   }
+  //   return users;
+  // };
 
   function formatDate(dateString) {
     const date = new Date(dateString); // Chuyển đổi chuỗi thành đối tượng Date
@@ -126,17 +175,19 @@ const UserManagement = () => {
     <View style={styles.searchRow}>
       <TextInput
       style={[styles.input, styles.searchInput]} 
-      placeholder="Search by Username"
+      placeholder="Search by Username or Email"
       value={searchTerm}
       onChangeText={setSearchTerm}
       />
-      <Button title="Search" onPress={fetchUsers} />
-      <Button title="Add User" onPress={() => setShowModal(true)} />
+      {/* <Button title="Search" onPress={fetchUsers} /> */}
+      <TouchableOpacity style={styles.addButton} onPress={() => setShowModal(true)}>
+        <Text style={styles.searchText}>Add User</Text>
+      </TouchableOpacity> 
     </View>
 
     {/* User List */}
     <FlatList
-      data={filterUsers()}
+      data={users}
       keyExtractor={(item) => item._id}
       renderItem={({ item }) => (
         <View style={styles.row}>
@@ -173,13 +224,13 @@ const UserManagement = () => {
       )}
       ListFooterComponent={() => (
         <View style={styles.paginationContainer}>
-          <TouchableOpacity style={styles.paginationButton}  >
+          <TouchableOpacity style={styles.paginationButton} onPress={handlePreviousPage} disabled={currentPage === 1}>
             <Text style={styles.paginationText}>Previous</Text>
           </TouchableOpacity>
     
-          <Text style={styles.paginationText}>Page of </Text>
+          <Text style={styles.paginationText}>Page {currentPage} of {totalPages}</Text>
 
-          <TouchableOpacity style={styles.paginationButton} >
+          <TouchableOpacity style={styles.paginationButton} onPress={handleNextPage} disabled={currentPage === totalPages}>
             <Text style={styles.paginationText}>Next</Text>
           </TouchableOpacity>
         </View>
@@ -242,7 +293,7 @@ const UserManagement = () => {
               <Picker.Item label="Admin" value="admin" />
             </Picker>
           )}
-          <Button style={styles.modalButton} title={editMode ? 'Update User' : 'Submit'} onPress={addUser} />
+          <Button style={styles.modalButton} title={editMode ? 'Update User' : 'Submit'} onPress={validateUser} />
           <Button style={styles.modalButton} title="Cancel" color="red" onPress={resetForm} />
         </View>
       </View>
@@ -270,6 +321,33 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1, 
     marginRight: 10, 
+  },
+  searchText: {
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#000'
+  },
+  searchButton: {
+    width: 80,
+    height: 40,
+    padding: 10,
+    borderRadius: 5,
+    cursor: 'pointer',
+    marginTop: -10,
+    marginLeft: 10,
+    marginRight: 10,
+    backgroundColor: '#0099FF',
+  },
+  addButton: {
+    width: 200,
+    height: 40,
+    padding: 10,
+    borderRadius: 5,
+    cursor: 'pointer',
+    marginTop: -10,
+    marginLeft: 10,
+    backgroundColor: '#00FF00',
   },
   input: {
     borderWidth: 1,
@@ -347,12 +425,13 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     padding: 10,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#000000',
     borderBottomWidth: 2,
     borderBottomColor: '#ddd',
     alignItems: 'center',
   },
   userheaderCell: {
+    color: '#ffffff',
     flex: 1,
     fontWeight: 'bold',
     fontSize: 16,
@@ -362,6 +441,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   nameheaderCell: {
+    color: '#ffffff',
     flex: 1,
     fontWeight: 'bold',
     fontSize: 16,
@@ -371,6 +451,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   emailheaderCell: {
+    color: '#ffffff',
     flex: 1,
     fontWeight: 'bold',
     fontSize: 16,
@@ -380,6 +461,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   dateheaderCell: {
+    color: '#ffffff',
     flex: 1,
     fontWeight: 'bold',
     fontSize: 16,
@@ -389,6 +471,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   roleheaderCell: {
+    color: '#ffffff',
     width: 120,
     fontWeight: 'bold',
     fontSize: 16,
@@ -398,6 +481,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   actionheaderCell: {
+    color: '#ffffff',
     width: 300,
     fontWeight: 'bold',
     fontSize: 16,
