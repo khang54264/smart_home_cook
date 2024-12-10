@@ -3,31 +3,27 @@ import { Ionicons } from '@expo/vector-icons';
 import { View, Text, FlatList, StyleSheet, TextInput, Button, TouchableOpacity, Modal, ScrollView, Picker } from 'react-native';
 import axios from 'axios';
 
-const IngredientManagement = () => {
-  const [ingredients, setIngredients] = useState([]);
-  const [searchIngredient, setSearchIngredient] = useState([]);
+const TagManagement = () => {
+  const [tags, setTags] = useState([]);
+  const [searchTag, setSearchTag] = useState([]);
   const [name, setName] = useState('');
-  const [carb, setCarb] = useState('');
-  const [xo, setXo] = useState('');
-  const [fat, setFat] = useState('');
-  const [protein, setProtein] = useState('');
-  const [kcal, setKcal] = useState('');
+  const [info, setInfo] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [currentIngreId, setCurrentIngreId] = useState(null);
+  const [currentTagId, setCurrentTagId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(7); // Số phần tử trên mỗi trang
   const [totalPages, setTotalPages] = useState(1);    
 
   useEffect(() => {
-    fetchIngredient(currentPage, searchTerm);
+    fetchTag(currentPage,searchTerm);
   }, [currentPage, searchTerm]);
 
-  const fetchIngredient = (curPage, sTerm) => {
-    axios.get(`http://localhost:5000/ingredients/get?page=${curPage}&limit=7&search=${sTerm}`)
+  const fetchTag = (currentPage, searchTerm) => {
+    axios.get(`http://localhost:5000/tags/get?page=${currentPage}&limit=7&search=${searchTerm}`)
       .then((response) => {
-        setIngredients(response.data.ingredients); 
+        setTags(response.data.tags); 
         setTotalPages(response.data.totalPages); 
       })
       .catch((error) => console.error(error));
@@ -35,45 +31,45 @@ const IngredientManagement = () => {
   
   const handleSearch = () => {
     setCurrentPage(1);
-    fetchIngredient(1, searchTerm); // Fetch dữ liệu từ đầu khi tìm kiếm
+    fetchTag(1, searchTerm); // Fetch dữ liệu từ đầu khi tìm kiếm
     setCurrentPage(1);
-    fetchIngredient(1, searchTerm); 
+    fetchTag(1, searchTerm); 
   };
 
   const validateInput = () => {
-    if (!name || !carb || !xo || !fat || !protein || !kcal) {
+    if (!name || !info ) {
       alert("Vui lòng nhập đủ thông tin");
       return false;
     }
     return true;
   };
 
-  const addIngredient = () => {
+  const addTag = () => {
     if (!validateInput()) return;
     try {
-      const newIngre = { name, carb, xo, fat, protein, kcal};
+      const newTag = { name, info};
       if (editMode) {
-        // chỉnh sửa ingredient
-        axios.put(`http://localhost:5000/ingredients/update/${currentIngreId}`, newIngre)
+        // chỉnh sửa tag
+        axios.put(`http://localhost:5000/tags/update/${currentTagId}`, newTag)
           .then(response => {
-            console.log('Ingredient updated', response.data);
+            console.log('Tag updated', response.data);
             resetForm();
-            fetchIngredient(currentPage,'');
+            fetchTag(currentPage,'');
           })
           .catch(error => {
-            console.error('Error updating ingredient:', error);
-            alert('Failed to update ingredient. Please try again.');
+            console.error('Error updating tag:', error);
+            alert('Failed to update tag. Please try again.');
           });
       } else {
-        // Thêm ingredient
-        axios.post('http://localhost:5000/ingredients/add', newIngre)
+        // Thêm tag
+        axios.post('http://localhost:5000/tags/add', newTag)
           .then(response => {
-            console.log('Ingredient added', response.data);
+            console.log('Tag added', response.data);
             resetForm();
-            fetchIngredient(currentPage,'');
+            fetchTag(currentPage,'');
           }) .catch(error => {
-            console.error('Error adding ingredient:', error);
-            alert('Failed to add ingredient. Please try again.');
+            console.error('Error adding tag:', error);
+            alert('Failed to add tag. Please try again.');
       }); 
       }
     } catch (error) {
@@ -82,35 +78,27 @@ const IngredientManagement = () => {
     }};
   
 
-  const deleteIngredient = (IngreId) => {
-    axios.delete(`http://localhost:5000/ingredients/delete/${IngreId}`)
+  const deleteTag = (TagId) => {
+    axios.delete(`http://localhost:5000/tags/delete/${TagId}`)
       .then(response => {
-        console.log('Ingredient deleted', response.data);
-        fetchIngredient(currentPage,''); // Cập nhật danh sách sau khi xóa nguyên liệu
+        console.log('Tag deleted', response.data);
+        fetchTag(currentPage,''); // Cập nhật danh sách sau khi xóa nguyên liệu
       })
       .catch(error => console.error(error));
   };
 
-  const editIngredient = (ingre) => {
-    setCurrentIngreId(ingre._id);
-    setName(ingre.name);
-    setCarb(ingre.carb);
-    setXo(ingre.xo);
-    setFat(ingre.fat);
-    setProtein(ingre.protein);
-    setKcal(ingre.kcal);
+  const editTag = (tag) => {
+    setCurrentTagId(tag._id);
+    setName(tag.name);
+    setInfo(tag.info);
     setEditMode(true);
     setShowModal(true);
   };
 
   const resetForm = () => {
-    setCurrentIngreId(null);
+    setCurrentTagId(null);
     setName('');
-    setCarb('');
-    setXo('');
-    setFat('');
-    setProtein('');
-    setKcal('');
+    setInfo('');
     setEditMode(false);
     setShowModal(false);
   };
@@ -118,27 +106,27 @@ const IngredientManagement = () => {
 const handlePreviousPage = () => {
     if (currentPage > 1) {
       setCurrentPage(currentPage-1);
-      fetchIngredient(currentPage, searchTerm);
+      fetchTag(currentPage, searchTerm);
     } else {
       setCurrentPage(1);
-      fetchIngredient(currentPage, searchTerm);
+      fetchTag(currentPage, searchTerm);
     }
   };
   
   const handleNextPage = () => {
     if (currentPage < totalPages) {
       setCurrentPage(currentPage+1);
-      fetchIngredient(currentPage, searchTerm);
+      fetchTag(currentPage, searchTerm);
     } else {
       setCurrentPage(totalPages);
-      fetchIngredient(currentPage, searchTerm);
+      fetchTag(currentPage, searchTerm);
     }
   };
 
 
   return (
     <ScrollView style={styles.container}>
-    <Text style={styles.title}>Ingredient Management</Text>
+    <Text style={styles.title}>Tag Management</Text>
 
     <View style={styles.searchRow}>
       <TextInput
@@ -147,36 +135,30 @@ const handlePreviousPage = () => {
       value={searchTerm}
       onChangeText={setSearchTerm}
       />
-
-      {/* <Button title="Search" onPress={handleSearch} /> */}
-
-      <TouchableOpacity style={styles.addButton} onPress={() => setShowModal(true)}>
-          <Text style={styles.searchText}>Add Ingredient</Text>
-      </TouchableOpacity> 
+        {/* <Button title="Search" onPress={handleSearch} /> */}
+        <TouchableOpacity style={styles.addButton} onPress={() => setShowModal(true)}>
+          <Text style={styles.searchText}>Add Tag</Text>
+        </TouchableOpacity> 
     </View>
 
-    {/* Ingredient List */}
+    {/* Tag List */}
     <FlatList
-      data={ingredients}
+      data={tags}
       keyExtractor={(item) => item._id}
       renderItem={({ item }) => (
         <View style={styles.row}>
           <Text style={styles.namecell}>{item.name}</Text>
-          <Text style={styles.carbcell}>{item.carb}</Text>
-          <Text style={styles.xocell}>{item.xo}</Text>
-          <Text style={styles.fatcell}>{item.fat}</Text>
-          <Text style={styles.proteincell}>{item.protein}</Text>
-          <Text style={styles.kcalcell}>{item.kcal}</Text>
+          <Text style={styles.infocell}>{item.info}</Text>
           <View style={styles.actionCell}>
             <TouchableOpacity
               style={styles.editButton}
-              onPress={() => editIngredient(item)}
+              onPress={() => editTag(item)}
             >
               <Text style={styles.editButtonText}>Edit</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.deleteButton}
-              onPress={() => deleteIngredient(item._id)}
+              onPress={() => deleteTag(item._id)}
             >
               <Text style={styles.deleteButtonText}>Delete</Text>
             </TouchableOpacity>
@@ -185,12 +167,8 @@ const handlePreviousPage = () => {
       )}
       ListHeaderComponent={() => (
         <View style={styles.header}>
-          <Text style={styles.nameheaderCell}>Thực phẩm (100g)</Text>
-          <Text style={styles.carbheaderCell}>Carb (g)</Text>
-          <Text style={styles.xoheaderCell}>Xơ (g)</Text>
-          <Text style={styles.fatheaderCell}>Fat (g)</Text>
-          <Text style={styles.proteinheaderCell}>Protein (g)</Text>
-          <Text style={styles.kcalheaderCell}>Calo / Kcal</Text>
+          <Text style={styles.nameheaderCell}>Tag Name</Text>
+          <Text style={styles.infoheaderCell}>Tag Info</Text>
           <Text style={styles.actionheaderCell}>Actions</Text>
         </View>
       )}
@@ -209,7 +187,7 @@ const handlePreviousPage = () => {
       )}
     />
 
-    {/* Modal for Add/Edit Ingredient Form */}
+    {/* Modal for Add/Edit Tag Form */}
     <Modal
       visible={showModal}
       animationType="fade"
@@ -218,44 +196,20 @@ const handlePreviousPage = () => {
     >
       <View style={styles.modalContainer}>
         <View style={styles.modalContent}>
-          <Text style={styles.title}>{editMode ? 'Edit Ingredient' : 'Add New Ingredient'}</Text>
+          <Text style={styles.title}>{editMode ? 'Edit Tag' : 'Add New Tag'}</Text>
           <TextInput
             style={styles.input}
-            placeholder="Name"
+            placeholder="Tag Name"
             value={name}
             onChangeText={setName}
           />
           <TextInput
             style={styles.input}
-            placeholder="Carb (g)"
-            value={carb}
-            onChangeText={setCarb}
+            placeholder="Tag Info"
+            value={info}
+            onChangeText={setInfo}
           />
-          <TextInput
-            style={styles.input}
-            placeholder="Xơ (g)"
-            value={xo}
-            onChangeText={setXo}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Fat (g)"
-            value={fat}
-            onChangeText={setFat}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Protein (g)"
-            value={protein}
-            onChangeText={setProtein}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Calo / Kcal"
-            value={kcal}
-            onChangeText={setKcal}
-          />
-          <Button style={styles.modalButton} title={editMode ? 'Update Ingredient' : 'Submit'} onPress={addIngredient} />
+          <Button style={styles.modalButton} title={editMode ? 'Update Tag' : 'Submit'} onPress={addTag} />
           <Button style={styles.modalButton} title="Cancel" color="red" onPress={resetForm} />
         </View>
       </View>
@@ -336,51 +290,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5, 
     paddingLeft: 10,
   },
-  carbcell: {
-    flex: 1,
-    fontSize: 16,
-    height: 44,
-    borderWidth: 1, 
-    borderColor: '#ccc', 
-    paddingVertical: 8, 
-    paddingHorizontal: 5,
-    paddingLeft: 10, 
-    textAlign: 'center',
-  },
-  xocell: {
-    flex: 1,
-    fontSize: 16,
-    height: 44,
-    borderWidth: 1, 
-    borderColor: '#ccc', 
-    paddingVertical: 8, 
-    paddingHorizontal: 5,
-    paddingLeft: 10, 
-    textAlign: 'center',
-  },
-  fatcell: {
-    flex: 1,
-    fontSize: 16,
-    height: 44,
-    borderWidth: 1, 
-    borderColor: '#ccc', 
-    paddingVertical: 8, 
-    paddingHorizontal: 5,
-    paddingLeft: 10, 
-    textAlign: 'center',
-  },
-  proteincell: {
-    flex: 1,
-    fontSize: 16,
-    height: 44,
-    borderWidth: 1, 
-    borderColor: '#ccc', 
-    paddingVertical: 8, 
-    paddingHorizontal: 5,
-    paddingLeft: 10, 
-    textAlign: 'center',
-  },
-  kcalcell: {
+  infocell: {
     flex: 1,
     fontSize: 16,
     height: 44,
@@ -417,43 +327,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc', 
     paddingVertical: 8,
   },
-  carbheaderCell: {
-    flex: 1,
-    fontWeight: 'bold',
-    fontSize: 16,
-    textAlign: 'center',
-    borderWidth: 1, 
-    borderColor: '#ccc', 
-    paddingVertical: 8,
-  },
-  xoheaderCell: {
-    flex: 1,
-    fontWeight: 'bold',
-    fontSize: 16,
-    textAlign: 'center',
-    borderWidth: 1, 
-    borderColor: '#ccc', 
-    paddingVertical: 8,
-  },
-  fatheaderCell: {
-    flex: 1,
-    fontWeight: 'bold',
-    fontSize: 16,
-    textAlign: 'center',
-    borderWidth: 1, 
-    borderColor: '#ccc', 
-    paddingVertical: 8,
-  },
-  proteinheaderCell: {
-    flex: 1,
-    fontWeight: 'bold',
-    fontSize: 16,
-    textAlign: 'center',
-    borderWidth: 1, 
-    borderColor: '#ccc', 
-    paddingVertical: 8,
-  },
-  kcalheaderCell: {
+  infoheaderCell: {
     flex: 1,
     fontWeight: 'bold',
     fontSize: 16,
@@ -538,4 +412,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default IngredientManagement;
+export default TagManagement;

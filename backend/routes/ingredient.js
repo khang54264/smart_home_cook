@@ -2,8 +2,10 @@ const express = require('express');
 const router = express.Router();
 const ingredientController = require('../controllers/ingredientController');
 
+//Lấy toàn bộ
+router.get('/getall', ingredientController.getAllIngre);
 
-// Lấy toàn bộ nguyên liệu
+// Lấy nguyên liệu phân trang
 router.get('/get', ingredientController.getIngre);
 
 // Thêm nguyên liệu mới

@@ -1,6 +1,12 @@
 const Ingredient = require('../models/Ingredient');
 
 //Lấy toàn bộ nguyên liệu
+exports.getAllIngre = async (req, res) => {
+  const ingre = await Ingredient.find();
+  res.json(ingre);
+};
+
+//Lấy nguyên liệu theo trang
 exports.getIngre = async (req, res) => {
     try {
     const page = parseInt(req.query.page) || 1; // Lấy trang hiện tại
@@ -8,25 +14,26 @@ exports.getIngre = async (req, res) => {
     const skip = (page - 1) * limit; // Bỏ qua những phần tử trước đó
     const search = req.query.search || ''; //Tìm kiếm
 
-    // Đếm tổng số nguyên liệu
-    const totalIngredients = await Ingredient.countDocuments({ 
-      name: new RegExp(search, 'i') 
-    });
-    const totalPages = Math.ceil(totalIngredients / limit);
+      // Đếm tổng số nguyên liệu
+      const totalIngredients = await Ingredient.countDocuments({ 
+        name: new RegExp(search, 'i') 
+      });
+      const totalPages = Math.ceil(totalIngredients / limit);
 
-    // Lấy danh sách nguyên liệu với phân trang
-    const ingredients = await Ingredient.find({ 
-      name: new RegExp(search, 'i') 
-    })
-      .skip((page - 1) * limit)
-      .limit(limit);
+      // Lấy danh sách nguyên liệu với phân trang
+      const ingredients = await Ingredient.find({ 
+        name: new RegExp(search, 'i') 
+      })
+        .skip((page - 1) * limit)
+        .limit(limit);
 
-    // Trả về danh sách và tổng số trang
-    res.status(200).json({
-      ingredients,
-      totalPages,
-      currentPage: page, //Gửi về trang hiện tại
-    });
+      // Trả về danh sách và tổng số trang
+      res.status(200).json({
+        ingredients,
+        totalPages,
+        currentPage: page, //Gửi về trang hiện tại
+      });
+      
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

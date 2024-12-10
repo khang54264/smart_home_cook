@@ -16,19 +16,21 @@ app.use(cors({
   credentials: true,
 }));
 app.options('*',cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json()); 
 app.use(bodyParser.urlencoded({ extended: true }));
 
 //Routes
-const userRoutes = require('./routes/user');
-const dishRoutes = require('./routes/dish');
+const userRoutes = require('./routes/user');  
+const recipeRoutes = require('./routes/recipe');
 const ingredientRoutes = require('./routes/ingredient');
+const tagRoutes = require('./routes/tag');
 
 app.use('/users', userRoutes);
-app.use('/dishes', dishRoutes);
+app.use('/recipes', recipeRoutes);
 app.use('/ingredients', ingredientRoutes);
+app.use('/tags', tagRoutes);
 
-// MongoDB connection
+// MongoDB connection   
 mongoose.connect('mongodb://localhost:27017/homecook')
   .then(() => console.log('MongoDB connected'))
   .catch(err => console.error('MongoDB connection error:', err));
