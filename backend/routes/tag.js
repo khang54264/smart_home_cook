@@ -6,6 +6,15 @@ const tagController = require('../controllers/tagController');
 // Lấy nhãn thẻ phân trang
 router.get('/getall', tagController.getAllTag);
 
+// Lấy nhãn thẻ cho dropdown
+router.get('/getdropdown', tagController.getDropdownTag);
+
+// Lấy nhãn thẻ cho danh sách RecipeTag
+router.get('/getrecipetag', tagController.getRecipeTag);
+
+// Thêm nhãn thẻ cho danh sách RecipeTag
+router.get('/addreptag', tagController.addRecipeTag);
+
 // Lấy nguyên liệu phân trang
 router.get('/get', tagController.getTag);
 

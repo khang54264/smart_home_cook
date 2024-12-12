@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const IngredientListSchema = new mongoose.Schema({
-    _id: {
+    r_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Recipe', // Tham chiếu tới _id của RecipeSchema
         required: true

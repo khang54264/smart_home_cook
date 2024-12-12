@@ -8,6 +8,9 @@ import Icon from 'react-native-vector-icons/Ionicons';
 import firebaseConfig from '../../backend/firebaseConfig';
 import axios from 'axios';
 import StepManagement from './StepForm';
+import NutritionManagement from './NutritionForm';
+import TagManagement from './TagForm';
+import IngredientManagement from './IngredientForm';
 
 const RecipeManagement = () => {
   const defImage = 'https://firebasestorage.googleapis.com/v0/b/home-cook-54264.appspot.com/o/images%2FNoImage.jpg?alt=media&token=9ba8361b-879d-4ce6-97eb-35f1e1948ecd';
@@ -17,37 +20,24 @@ const RecipeManagement = () => {
   const [cookTime, setCookTime] = useState('');
   const [recipeImageUrl, setRecipeImageUrl] = useState(defImage);
   //Phân trang
-  const [currentTagId, setCurrentTagId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(7); // Số phần tử trên mỗi trang
   const [totalPages, setTotalPages] = useState(1);    
-  //Step
-  const [stepNumber, setStepNumber] = useState('');
-  const [stepName, setStepName] = useState('');
-  const [stepDescription, setStepDescription] = useState('');
-  const [stepImageUrl, setStepImageUrl] = useState(defImage);
-  //Nutrition
-  const [nutritions, setNutritions] = useState('');
-  //Ingredient
-  const [availableIngredients, setAvailableIngredients] = useState([]); // Dữ liệu nguyên liệu từ kho
-  const [selectedIngredients, setSelectedIngredients] = useState([]); // Nguyên liệu đã chọn
-  const [ingredientInput, setIngredientInput] = useState(''); // Giá trị trong TextInput
-  const [ingredients, setIngredients] = useState([]);
-  const [ingredientAmount, setIngredientAmount] = useState('');
   //Search
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredDishes, setFilteredDishes] = useState([]);
   //Modal
   const [recipeModalVisible, setRecipeModalVisible] = useState(false); //Modal thêm, sửa thông tin Recipe
   const [confirmModal, setConfirmModal] = useState(false); //Modal dùng để xác nhận xóa Recipe
   const [stepModalVisible, setStepModalVisible] = useState(false); //Modal thông tin bước nấu ăn
+  const [nutritionModalVisible, setNutritionModalVisible] = useState(false); //Modal thông tin dinh dưỡng
+  const [tagModalVisible, setTagModalVisible] = useState(false); //Modal thông tin nhãn thẻ
+  const [ingreModalVisible, setIngreModalVisible] = useState(false); //Modal thông tin nguyên liệu
   const [isEditing, setIsEditing] = useState(false); //Trạng thái modal thông tin Recipe
   const [editRecipeId, setEditRecipeId] = useState(null);
   const [deleteRecipeId, setDeleteRecipeId] = useState(null);
 
   useEffect(() => {
     fetchRecipes(currentPage,searchTerm);
-    fetchIngredient();
   }, [currentPage, searchTerm]);
 
   const fetchRecipes = (currentPage, searchTerm) => {
@@ -59,20 +49,12 @@ const RecipeManagement = () => {
       .catch(error => console.error(error));
   };
 
-  const fetchIngredient = () => {
-    axios.get(`http://localhost:5000/ingredients/getall`)
-      .then((response) => {
-        setIngredients(response.data.ingredients); 
-      })
-      .catch((error) => console.error(error));
-  };
-
-  const handleSearch = () => {
-    setCurrentPage(1);
-    fetchTag(1, searchTerm); // Fetch dữ liệu từ đầu khi tìm kiếm
-    setCurrentPage(1);
-    fetchTag(1, searchTerm); 
-  };
+  // const handleSearch = () => {
+  //   setCurrentPage(1);
+  //   fetchTag(1, searchTerm); // Fetch dữ liệu từ đầu khi tìm kiếm
+  //   setCurrentPage(1);
+  //   fetchTag(1, searchTerm); 
+  // };
 
   const validateInput = () => {
     if (!name || !cookTime ) {
@@ -126,7 +108,7 @@ const RecipeManagement = () => {
         console.error('Error updating recipe:', error);
         alert('Failed to update recipe. Please try again.');
       });
-  };
+    };
 
   const deleteRecipe = (recipeId) => {
     setConfirmModal(true);
@@ -149,7 +131,6 @@ const RecipeManagement = () => {
     setName('');
     setCookTime('');
     setRecipeImageUrl(defImage);
-    setStepImageUrl(defImage);
     setIsEditing(false);
     setEditRecipeId(null);
   };
@@ -206,26 +187,6 @@ const RecipeManagement = () => {
     } catch (error) {
       console.error("Image upload failed: ", error);
     }
-  };
-
-  const addStep = () => {
-    setStepNumner('');
-    setStepName('');
-    setStepDescription('');
-    setRecipeImageUrl('');  
-  };
-
-  const submitSteps = () => {
-    const newSteps = {
-      _id: editRecipeId,
-      steps
-    };
-  
-    axios.post('http://localhost:5000/steps', newSteps)
-      .then(response => {
-        closeRecipeForm();
-      })
-      .catch(error => console.error(error));
   };
 
   const getDate = (datetime) => {
@@ -375,13 +336,13 @@ const RecipeManagement = () => {
                   <View style={styles.modalRow}>
                     <TouchableOpacity
                       style={[styles.modalButton, { backgroundColor: 'orange' }]}
-                      onPress={() => setStepModalVisible(true)}>
+                      onPress={() => setIngreModalVisible(true)}>
                       <Icon style={styles.modalButtonIcon} name="leaf" size={16} color={'#fff'}/>
                       <Text style={styles.modalButtonText}>Manage Ingredients</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.modalButton, { backgroundColor: 'purple' }]}
-                      onPress={() => setStepModalVisible(true)}>
+                      onPress={() => setNutritionModalVisible(true)}>
                       <Icon style={styles.modalButtonIcon} name="heart" size={16} color={'#fff'}/>
                       <Text style={styles.modalButtonText}>Manage Nutritions</Text>
                     </TouchableOpacity>
@@ -391,7 +352,7 @@ const RecipeManagement = () => {
                   <View style={styles.modalRow}>
                     <TouchableOpacity
                       style={[styles.modalButton, { backgroundColor: 'yellow' }]}
-                      onPress={() => setStepModalVisible(true)}>
+                      onPress={() => setTagModalVisible(true)}>
                       <Icon style={styles.modalButtonIcon} name="pricetags" size={16} color={'#fff'}/>
                       <Text style={styles.modalButtonText}>Manage Tags</Text>
                     </TouchableOpacity>
@@ -435,6 +396,33 @@ const RecipeManagement = () => {
         animationType="fade"
         transparent={true}
         onClose={() => setStepModalVisible(false)}
+        recipeId={editRecipeId}
+      />
+
+      {/* Form nhập các thông tin dinh dưỡng */}
+      <NutritionManagement
+        visible={nutritionModalVisible}
+        animationType="fade"
+        transparent={true}
+        onClose={() => setNutritionModalVisible(false)}
+        recipeId={editRecipeId}
+      />
+
+      {/* Form nhập các nguyên liệu */}
+      {/* <IngredientManagement
+        visible={ingreModalVisible}
+        animationType="fade"
+        transparent={true}
+        onClose={() => setIngreModalVisible(false)}
+        recipeId={editRecipeId}
+      /> */}
+
+      {/* Form nhập các nhãn thẻ*/}
+      <TagManagement
+        visible={tagModalVisible}
+        animationType="fade"
+        transparent={true}
+        onClose={() => setTagModalVisible(false)}
         recipeId={editRecipeId}
       />
     </ScrollView>

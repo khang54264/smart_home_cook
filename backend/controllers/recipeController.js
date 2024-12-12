@@ -94,10 +94,10 @@ exports.deleteRecipe = async (req, res) => {
       FavoriteRecipe.deleteMany({ r_id: recipeId }),
       ShoppingList.deleteMany({ r_id: recipeId }),
       PlanRecipe.deleteMany({ r_id: recipeId }),
-      RecipeTag.deleteMany({ _id: recipeId }),
-      RecipeStep.deleteMany({ _id: recipeId }),
-      IngredientList.deleteMany({ _id: recipeId }),
-      Nutrition.deleteMany({ _id: recipeId }),
+      RecipeTag.deleteMany({ r_id: recipeId }),
+      RecipeStep.deleteMany({ r_id: recipeId }),
+      IngredientList.deleteMany({ r_id: recipeId }),
+      Nutrition.deleteMany({ r_id: recipeId }),
     ]);
 
     res.json({ message: 'Recipe and related records are deleted succesfully' });
