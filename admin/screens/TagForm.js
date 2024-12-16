@@ -28,7 +28,7 @@ const TagForm = ({ visible, onClose, recipeId }) => {
             })
             .catch(error => console.error(error));
         } catch (error) {
-            console.error('Error fetching nutritions:', error);
+            console.error('Error fetching tags:', error);
         }
     };
 
@@ -40,7 +40,7 @@ const TagForm = ({ visible, onClose, recipeId }) => {
             })
             .catch(error => console.error(error));
         } catch (error) {
-            console.error('Error fetching nutritions:', error);
+            console.error('Error fetching tags:', error);
         }
     };
 
@@ -68,11 +68,11 @@ const TagForm = ({ visible, onClose, recipeId }) => {
                 fetchDropdownTag(tagInput);
             })
             .catch(error => {
-                console.error('Error adding step:', error);
-                alert('Failed to add step. Please try again.');
+                console.error('Error adding tag:', error);
+                alert('Failed to add tag. Please try again.');
             });
         } catch (error) {
-            console.error('Error adding step:', error);
+            console.error('Error adding tag:', error);
         }
     };
 
@@ -81,7 +81,7 @@ const TagForm = ({ visible, onClose, recipeId }) => {
         <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
             <Text style={styles.title}>MANAGE TAGS</Text>  
-             {/* Validate step */}
+             {/* Validate tag */}
             <View style={styles.contentColumns}>
                 <View style={styles.leftColumn}>
                     {/* Tags Dropdown */}

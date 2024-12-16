@@ -18,7 +18,7 @@ exports.getDropdownTag = async (req, res) => {
         {info: new RegExp(search, 'i')}
       ]
   }).collation({ locale: 'vi', strength: 1 })
-  // Trả về danh sách và tổng số trang
+  // Trả về danh sách 
   res.status(200).json({
     tags: tags,
   });
@@ -57,7 +57,7 @@ exports.getRecipeTag = async (req, res) => {
         }
       }
     ]).collation({ locale: 'vi', strength: 1 })
-    // Trả về danh sách và tổng số trang
+    // Trả về danh sách 
     res.status(200).json({
       tags: tags,
     });
@@ -70,7 +70,7 @@ exports.getRecipeTag = async (req, res) => {
 exports.addRecipeTag = async (req, res) => {
   try {
       const { r_id, t_id} = req.body;
-      // Kiểm tra xem nguyên liệu đã tồn tại hay chưa
+      // Kiểm tra xem nhãn thẻ đã tồn tại hay chưa
       const existingTag = await RecipeTag.findOne({ r_id, t_id });
       if (existingTag) {
           return res.status(400).json({ message: 'Recipe already got the tag' });

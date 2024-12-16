@@ -5,6 +5,15 @@ const ingredientController = require('../controllers/ingredientController');
 //Lấy toàn bộ
 router.get('/getall', ingredientController.getAllIngre);
 
+// Lấy nguyên liệu cho dropdown
+router.get('/getdropdown', ingredientController.getDropdownIngredient);
+
+// Lấy nguyên liệu cho danh sách IngredientList
+router.get('/getingrelist', ingredientController.getIngreList);
+
+// Thêm nguyên liệu cho danh sách IngredientList
+router.get('/addingrelist', ingredientController.addIngreList);
+
 // Lấy nguyên liệu phân trang
 router.get('/get', ingredientController.getIngre);
 

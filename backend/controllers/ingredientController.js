@@ -1,9 +1,89 @@
 const Ingredient = require('../models/Ingredient');
+const IngredientList = require('../models/IngredientList');
 
 //Lấy toàn bộ nguyên liệu
 exports.getAllIngre = async (req, res) => {
   const ingre = await Ingredient.find();
   res.json(ingre);
+};
+
+//Lấy nguyên liệu cho dropdown
+exports.getDropdownIngredient = async (req, res) => {
+  try {
+    const search = req.query.search || ''; //Tìm kiếm
+    // Lấy danh sách nguyên liệu
+    const ingredients = await Ingredient.find({ 
+      $or: [
+        {name: new RegExp(search, 'i')},
+        {type: new RegExp(search, 'i')}
+      ]
+  }).collation({ locale: 'vi', strength: 1 })
+  // Trả về danh sách
+  res.status(200).json({
+    ingredients: ingredients,
+  });
+} catch (error) {
+  res.status(500).json({ message: error.message });
+}
+};
+
+//Lấy danh sách nguyên liệu của món ăn
+exports.getIngreList = async (req, res) => {
+  try {
+    const recipeId = req.query.recipeId || ''; //Tìm kiếm
+    // Lấy danh sách nguyên liệu
+    const ingredients = await IngredientList.aggregate([
+      {
+        $match: { r_id: mongoose.Types.ObjectId(recipeId) } // Lọc theo recipeId
+      },
+      {
+        $lookup: {
+          from: 'ingredients', // Tên collection Ingredient trong MongoDB (phải là dạng số nhiều của tên model)
+          localField: 'i_id',
+          foreignField: '_id',
+          as: 'ingredientDetails' // Gán dữ liệu từ Ingredient vào đây
+        }
+      },
+      {
+        $unwind: '$ingredientDetails' // Trích xuất dữ liệu từ mảng ingredientDetails
+      },
+      {
+        $project: {
+          _id: 1, // _id của IngredientList
+          r_id: 1,
+          i_id: 1,
+          name: '$ingredientDetails.name', // Lấy name từ Ingredient
+          type: '$ingredientDetails.type'  // Lấy type từ Ingredient
+        }
+      }
+    ]).collation({ locale: 'vi', strength: 1 })
+    // Trả về danh sách 
+    res.status(200).json({
+      ingredients: ingredients,
+    });
+} catch (error) {
+  res.status(500).json({ message: error.message });
+}
+};
+
+// Thêm IngredientList
+exports.addIngreList = async (req, res) => {
+  try {
+      const { r_id, i_id} = req.body;
+      // Kiểm tra xem nguyên liệu đã tồn tại hay chưa
+      const existingIngre = await IngredientList.findOne({ r_id, i_id });
+      if (existingIngre) {
+          return res.status(400).json({ message: 'Recipe already got the ingredient' });
+      }
+      const newIngreList = new IngredientList({
+        r_id: r_id,
+        i_id: i_id,
+      });
+      const savedIngre = await newIngreList.save();
+      res.status(201).json(savedIngre);
+    } catch (error) {
+      res.status(400).json({ message: error.message });
+    }
 };
 
 //Lấy nguyên liệu theo trang
