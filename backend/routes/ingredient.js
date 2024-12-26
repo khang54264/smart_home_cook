@@ -12,7 +12,10 @@ router.get('/getdropdown', ingredientController.getDropdownIngredient);
 router.get('/getingrelist', ingredientController.getIngreList);
 
 // Thêm nguyên liệu cho danh sách IngredientList
-router.get('/addingrelist', ingredientController.addIngreList);
+router.post('/addingrelist', ingredientController.addIngreList);
+
+// Xóa nguyên liệu cho danh sách IngredientList
+router.delete('/delingrelist/:id', ingredientController.deleteIngreList);
 
 // Lấy nguyên liệu phân trang
 router.get('/get', ingredientController.getIngre);

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const FavoriteRecipeSchema = new mongoose.Schema({
-    _id: {
+    u_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User', // Tham chiếu tới _id của UserSchema
         required: true

@@ -45,6 +45,7 @@ const TagForm = ({ visible, onClose, recipeId }) => {
     };
 
     const selectTag = (item) => {
+        console.log(item);
         setTag(item);
         setTagInput(item.name);
     };
@@ -56,8 +57,8 @@ const TagForm = ({ visible, onClose, recipeId }) => {
         }
         try {
             const newRepTag = {
-                r_id: recipeId,
-                t_id: tag._id
+                r_id: recipeId.trim(),
+                t_id: tag._id.trim()
             };
             axios.post('http://localhost:5000/tags/addreptag', newRepTag)
             .then(response => {
@@ -73,6 +74,26 @@ const TagForm = ({ visible, onClose, recipeId }) => {
             });
         } catch (error) {
             console.error('Error adding tag:', error);
+        }
+    };
+
+    const removeTag = (TagId) => {
+        if (!recipeId || !TagId) {
+            alert('Missing recipe ID or tag ID.');
+            return;
+        }
+        try {
+            axios.delete(`http://localhost:5000/tags/delreptag/${TagId}`)
+                .then(response => {
+                    console.log('Tag removed:', response.data);
+                    fetchRecipeTag(recipeId); // Cập nhật danh sách tags
+                })
+                .catch(error => {
+                    console.error('Error removing tag:', error);
+                    alert('Failed to remove tag. Please try again.');
+                });
+        } catch (error) {
+            console.error('Error removing tag:', error);
         }
     };
 
@@ -110,10 +131,10 @@ const TagForm = ({ visible, onClose, recipeId }) => {
                     </View>
                     <View style={styles.assignedTagsContainer}>
                         {assignedTags.map((tag) => (
-                            <View key={tag} style={styles.tagItem}>
-                                <Text style={styles.tagText}>{tag}</Text>
-                                <TouchableOpacity onPress={() => removeTag(tag)} style={styles.removeButton}>
-                                    <Text style={styles.removeButtonText}>x</Text>
+                            <View key={tag._id} style={styles.tagItem}>
+                                <Text style={styles.tagText}>{tag.name}</Text>
+                                <TouchableOpacity onPress={() => removeTag(tag._id)} style={styles.removeButton}>
+                                    <Text style={styles.removeButtonText}>X</Text>
                                 </TouchableOpacity>
                             </View>
                         ))}

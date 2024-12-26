@@ -409,13 +409,13 @@ const RecipeManagement = () => {
       />
 
       {/* Form nhập các nguyên liệu */}
-      {/* <IngredientManagement
+      <IngredientManagement
         visible={ingreModalVisible}
         animationType="fade"
         transparent={true}
         onClose={() => setIngreModalVisible(false)}
         recipeId={editRecipeId}
-      /> */}
+      />
 
       {/* Form nhập các nhãn thẻ*/}
       <TagManagement

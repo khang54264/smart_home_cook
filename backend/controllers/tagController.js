@@ -1,5 +1,6 @@
 const Tag = require('../models/Tag');
 const RecipeTag = require('../models/RecipeTag');
+const mongoose = require('mongoose');
 
 //Lấy toàn bộ nhãn thẻ
 exports.getAllTag = async (req, res) => {
@@ -31,10 +32,14 @@ exports.getDropdownTag = async (req, res) => {
 exports.getRecipeTag = async (req, res) => {
   try {
     const recipeId = req.query.recipeId || ''; //Tìm kiếm
+    // Kiểm tra xem recipeId có hợp lệ không
+    if (!mongoose.Types.ObjectId.isValid(recipeId)) {
+      return res.status(400).json({ message: 'Invalid recipe ID' });
+    }
     // Lấy danh sách nhãn thẻ
     const tags = await RecipeTag.aggregate([
       {
-        $match: { r_id: mongoose.Types.ObjectId(recipeId) } // Lọc theo recipeId
+        $match: { r_id: new mongoose.Types.ObjectId(recipeId) } // Lọc theo recipeId
       },
       {
         $lookup: {
@@ -70,20 +75,37 @@ exports.getRecipeTag = async (req, res) => {
 exports.addRecipeTag = async (req, res) => {
   try {
       const { r_id, t_id} = req.body;
+      // Log kiểm tra dữ liệu
+      console.log("Received data:", { r_id, t_id });
+      if (!r_id || !t_id) {
+        return res.status(400).json({ message: 'Both r_id and t_id are required.' });
+      }
       // Kiểm tra xem nhãn thẻ đã tồn tại hay chưa
       const existingTag = await RecipeTag.findOne({ r_id, t_id });
       if (existingTag) {
           return res.status(400).json({ message: 'Recipe already got the tag' });
       }
-      const newRecipeTag = new RecipeTag({
-        r_id: r_id,
-        t_id: t_id,
-      });
+      const newRecipeTag = new RecipeTag({r_id,t_id});
       const savedTag = await newRecipeTag.save();
       res.status(201).json(savedTag);
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
+};
+
+// Xóa RecipeTag
+exports.deleteRecipeTag = async (req, res) => {
+  const tagId = req.params.id;
+  try {
+    // Xóa nhãn thẻ
+    const deletedTag = await RecipeTag.findByIdAndDelete(tagId);
+    if (!deletedTag) {
+      return res.status(404).json({ message: 'Tag not found' });
+    }
+    res.json({ message: 'Recipe Tag is deleted succesfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 //Lấy nhãn thẻ theo trang

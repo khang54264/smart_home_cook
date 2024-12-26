@@ -8,14 +8,3 @@ const RecipeSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('Recipe', RecipeSchema);
-
-{/*
-ingredients: [{
-    ingredient_id: {
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Ingredient', // Tham chiếu tới IngredientSchema
-        required: true
-    },
-    ingredient_amount: { type: String },
-}],
-*/}

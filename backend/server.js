@@ -8,7 +8,7 @@ const app = express();
 
 const PORT = 5000;
 
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:8081'];
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:8081', 'http://localhost:8082'];
 
 app.use(cors({
   origin: allowedOrigins, //Kết nối tới frontend 
@@ -26,6 +26,7 @@ const ingredientRoutes = require('./routes/ingredient');
 const tagRoutes = require('./routes/tag');
 const stepRoutes = require('./routes/step');
 const nutritionRoutes = require('./routes/nutrition');
+const planRoutes = require('./routes/plan');
 
 app.use('/users', userRoutes);
 app.use('/recipes', recipeRoutes);
@@ -33,6 +34,7 @@ app.use('/ingredients', ingredientRoutes);
 app.use('/tags', tagRoutes);
 app.use('/steps', stepRoutes);
 app.use('/nutritions', nutritionRoutes);
+app.use('/plans', planRoutes);
 
 // MongoDB connection   
 mongoose.connect('mongodb://localhost:27017/homecook')

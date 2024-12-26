@@ -7,7 +7,7 @@ const MealPlanSchema = new mongoose.Schema({
         required: true
     },
     name: {type: String, required: true, default: 'Untitled Plan'},
-    time: { type: Date} ,
+    // time: { type: Date} ,
     time_created: { type: Date, default: Date.now },
 });
 

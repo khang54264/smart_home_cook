@@ -10,6 +10,8 @@ import axios from 'axios';
 const IngredientForm = ({ visible, onClose, recipeId }) => {
     const [ingredient, setIngredient] = useState([]);
     const [ingredientInput, setIngredientInput] = useState(''); // Input trong dropdown
+    const [amount, setAmount] = useState('');
+    const [unit, setUnit] = useState('');
     const [dropdownIngredients, setDropdownIngredients] = useState([]); // Danh sách nguyên liệu trong dropdown
     const [assignedIngredients, setAssignedIngredients] = useState([]); // Danh sách nguyên liệu đã được gán
 
@@ -22,7 +24,7 @@ const IngredientForm = ({ visible, onClose, recipeId }) => {
 
     const fetchIngreList = (recipeId) => {
         try {
-            axios.get(`http://localhost:5000/ingredients/getrecipetag?recipeId=${recipeId}`)
+            axios.get(`http://localhost:5000/ingredients/getingrelist?recipeId=${recipeId}`)
             .then(response => {
                 setAssignedIngredients(response.data.ingredients);
             })
@@ -56,14 +58,18 @@ const IngredientForm = ({ visible, onClose, recipeId }) => {
         }
         try {
             const newIngreList = {
-                r_id: recipeId,
-                i_id: ingredient._id
+                r_id: recipeId.trim(),
+                i_id: ingredient._id.trim(),
+                amount: amount.trim(),
+                unit: unit.trim(),
             };
             axios.post('http://localhost:5000/ingredients/addingrelist', newIngreList)
             .then(response => {
                 console.log('Ingredient added', response.data);
                 fetchIngreList(recipeId);
                 setIngredientInput('');
+                setAmount('');
+                setUnit('');
                 setIngredient(null);
                 fetchDropdownIngre(ingredientInput);
             })
@@ -76,6 +82,26 @@ const IngredientForm = ({ visible, onClose, recipeId }) => {
         }
     };
 
+    const removeIngre = (IngreId) => {
+        if (!recipeId || !IngreId) {
+            alert('Missing recipe ID or ingredient ID.');
+            return;
+        }
+        try {
+            axios.delete(`http://localhost:5000/ingredients/delingrelist/${IngreId}`)
+                .then(response => {
+                    console.log('Ingredient removed:', response.data);
+                    fetchIngreList(recipeId); // Cập nhật danh sách ingredients
+                })
+                .catch(error => {
+                    console.error('Error removing Ingredient:', error);
+                    alert('Failed to remove Ingredient. Please try again.');
+                });
+        } catch (error) {
+            console.error('Error removing Ingredient:', error);
+        }
+    };
+
     return (
     <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
         <View style={styles.modalContainer}>
@@ -85,6 +111,20 @@ const IngredientForm = ({ visible, onClose, recipeId }) => {
             <View style={styles.contentColumns}>
                 <View style={styles.leftColumn}>
                     {/* Ingredients Dropdown */}
+                    <View style={styles.modalRow}>
+                        <Text style={styles.modalLabel}>Amount:</Text>
+                        <TextInput
+                            style={styles.modalInput}
+                            value={amount}
+                            onChangeText={setAmount}
+                            placeholder="Amount"/>
+                        <Text style={styles.modalLabel}>Unit:</Text>
+                        <TextInput
+                            style={styles.modalInput}
+                            value={unit}
+                            onChangeText={setUnit}
+                            placeholder="Unit"/>
+                    </View>
                     <View style={styles.modalRow}>
                         <Text style={styles.modalLabel}>Find Ingredient:</Text>
                         <TextInput
@@ -111,9 +151,9 @@ const IngredientForm = ({ visible, onClose, recipeId }) => {
                     <View style={styles.assignedTagsContainer}>
                         {assignedIngredients.map((ingre) => (
                             <View key={ingre} style={styles.ingreItem}>
-                                <Text style={styles.ingreText}>{ingre}</Text>
-                                <TouchableOpacity onPress={() => removeTag(ingre)} style={styles.removeButton}>
-                                    <Text style={styles.removeButtonText}>x</Text>
+                                <Text style={styles.ingreText}>{ingre.name} {ingre.amount} {ingre.unit}</Text>
+                                <TouchableOpacity onPress={() => removeIngre(ingre._id)} style={styles.removeButton}>
+                                    <Text style={styles.removeButtonText}>X</Text>
                                 </TouchableOpacity>
                             </View>
                         ))}

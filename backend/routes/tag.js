@@ -13,7 +13,10 @@ router.get('/getdropdown', tagController.getDropdownTag);
 router.get('/getrecipetag', tagController.getRecipeTag);
 
 // Thêm nhãn thẻ cho danh sách RecipeTag
-router.get('/addreptag', tagController.addRecipeTag);
+router.post('/addreptag', tagController.addRecipeTag);
+
+// Xóa nhãn thẻ cho danh sách RecipeTag
+router.delete('/delreptag/:_id', tagController.deleteRecipeTag);
 
 // Lấy nguyên liệu phân trang
 router.get('/get', tagController.getTag);

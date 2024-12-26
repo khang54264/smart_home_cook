@@ -45,6 +45,7 @@ const MealPlan = require('../models/MealPlan');
               user: {
                   id: user._id,
                   username: user.username,
+                  name: user.name,
                   email: user.email,
                   role: user.role,
                   token: user.token,
@@ -197,6 +198,30 @@ exports.getUser = async (req, res) => {
       res.status(500).json({ message: error.message });
     }
   };
+
+  // Trong userController.js
+exports.getUserProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;  // Lấy userId từ JWT token hoặc session
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Trả về thông tin người dùng
+    res.json({
+      username: user.username,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      time_created: user.time_created,
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
   
   // Tìm kiếm User
   exports.searchUser = async (req, res) => {

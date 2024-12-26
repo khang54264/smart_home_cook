@@ -20,6 +20,12 @@ router.delete('/delete/:_id', userController.deleteUser);
 // Chỉnh sửa User
 router.put('/update/:_id', userController.updateUser);
 
+// Hiển thị thông tin người dùng
+router.get('/getuserprofile', userController.getUserProfile);
+
+//Thay đổi mật khẩu
+router.put('/changepassword', userController.changePassword);
+
 // Tìm kiếm User
 router.get('/search', userController.searchUser);
 

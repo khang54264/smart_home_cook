@@ -1,5 +1,6 @@
 const Ingredient = require('../models/Ingredient');
 const IngredientList = require('../models/IngredientList');
+const mongoose = require('mongoose');
 
 //Lấy toàn bộ nguyên liệu
 exports.getAllIngre = async (req, res) => {
@@ -31,10 +32,14 @@ exports.getDropdownIngredient = async (req, res) => {
 exports.getIngreList = async (req, res) => {
   try {
     const recipeId = req.query.recipeId || ''; //Tìm kiếm
+    // Kiểm tra xem recipeId có hợp lệ không
+    if (!mongoose.Types.ObjectId.isValid(recipeId)) {
+      return res.status(400).json({ message: 'Invalid recipe ID' });
+    }
     // Lấy danh sách nguyên liệu
     const ingredients = await IngredientList.aggregate([
       {
-        $match: { r_id: mongoose.Types.ObjectId(recipeId) } // Lọc theo recipeId
+        $match: { r_id: new mongoose.Types.ObjectId(recipeId) } // Lọc theo recipeId
       },
       {
         $lookup: {
@@ -53,7 +58,9 @@ exports.getIngreList = async (req, res) => {
           r_id: 1,
           i_id: 1,
           name: '$ingredientDetails.name', // Lấy name từ Ingredient
-          type: '$ingredientDetails.type'  // Lấy type từ Ingredient
+          type: '$ingredientDetails.type', // Lấy type từ Ingredient
+          amount: 1,
+          unit: 1,
         }
       }
     ]).collation({ locale: 'vi', strength: 1 })
@@ -69,21 +76,38 @@ exports.getIngreList = async (req, res) => {
 // Thêm IngredientList
 exports.addIngreList = async (req, res) => {
   try {
-      const { r_id, i_id} = req.body;
+      const { r_id, i_id, amount, unit} = req.body;
+      // Log kiểm tra dữ liệu
+      console.log("Received data:", { r_id, i_id, amount, unit });
+      if (!r_id || !i_id) {
+        return res.status(400).json({ message: 'Both r_id and i_id are required.' });
+      }
       // Kiểm tra xem nguyên liệu đã tồn tại hay chưa
       const existingIngre = await IngredientList.findOne({ r_id, i_id });
       if (existingIngre) {
           return res.status(400).json({ message: 'Recipe already got the ingredient' });
       }
-      const newIngreList = new IngredientList({
-        r_id: r_id,
-        i_id: i_id,
-      });
+      const newIngreList = new IngredientList({r_id,i_id, amount, unit});
       const savedIngre = await newIngreList.save();
       res.status(201).json(savedIngre);
     } catch (error) {
       res.status(400).json({ message: error.message });
     }
+};
+
+// Xóa IngredientList
+exports.deleteIngreList = async (req, res) => {
+  const ingredientId = req.params.id;
+  try {
+    // Xóa nguyên liệu
+    const deletedIngreList = await IngredientList.findByIdAndDelete(ingredientId);
+    if (!deletedIngreList) {
+      return res.status(404).json({ message: 'Ingredient not found' });
+    }
+    res.json({ message: 'Ingredient is deleted succesfully' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
 //Lấy nguyên liệu theo trang
